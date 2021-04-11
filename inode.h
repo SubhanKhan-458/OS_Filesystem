@@ -1,7 +1,6 @@
 #ifndef _inode.h_
 #define _inode.h_
 
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -9,18 +8,17 @@
 #include<math.h>
 #include <fcntl.h>
 
-// total disk size = 512MB
-// total no of blocks = 512M/4096 = 131072
-#define DISK_BLOCKS 131072        
+#define DISK_BLOCKS 131072        // 512M/4096 = 131072
 #define BLOCK_SIZE 4096           
-#define NO_OF_INODES 78644 //60% -> 78644  | 70% -> 87659      
+#define NO_OF_INODES 78644 //60% -> 78644  | 70% -> 87659 | 80% -> 98765     
 #define NO_OF_FILE_DESCRIPTORS 3
 //standard 32 
 
-struct inode // 4Byte
+struct inode // 4Byte +
 {
     int filesize;
-    int pointer_blocks[256];    //Per file 1MB=1048576/4096
+    //int pointer_blocks[256];    //Per file 1MB=1048576/4096
+
 };
 
 struct mapping // 36Byte
