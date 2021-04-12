@@ -3,8 +3,7 @@
 
 #include "globals.h"
 
-struct superblock {
-    ;
+struct superblock { 
 };
 
 typedef struct superblock superblock;

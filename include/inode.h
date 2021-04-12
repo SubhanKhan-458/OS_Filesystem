@@ -8,9 +8,9 @@
 #define DIRECT_BLOCKS 10
 #define INDIRECT_DEPTH 2 // SINGLE INDIRECT + DOUBLE INDIRECT
 
-// INODE SIZE = 48 BYTES
-// BLOCK SIZE / INODE SIZE = 85 INODES IN ONE BLOCK
-// INODES IN ONE BLOCK * (5% OF TOTAL BLOCKS) = 557,005 INODES IN 5% OF TOTAL BLOCKS
+// INODE SIZE = 88 BYTES
+// BLOCK SIZE / INODE SIZE = 46 INODES IN ONE BLOCK
+// INODES IN ONE BLOCK * (5% OF TOTAL BLOCKS) = 301,438 INODES IN 5% OF TOTAL BLOCKS
 struct inode {
     u_int32_t size; // 4 BYTES
     // u_int32_t index; // 4 BYTES
@@ -21,6 +21,10 @@ struct inode {
     time_t last_changed; // 8 BYTES
     time_t created_at; // 8 BYTES
     u_int32_t index_pointers[DIRECT_BLOCKS + INDIRECT_DEPTH]; // 4 * (10 + 2) BYTES
+};
+
+struct indirect_block {
+    u_int32_t index_pointers[DIRECT_BLOCKS + INDIRECT_DEPTH]; // 48 BYTES
 };
 
 typedef struct inode inode;
