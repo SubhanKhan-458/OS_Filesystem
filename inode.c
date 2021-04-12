@@ -1,4 +1,4 @@
-// #include "inode.h"
+#include "inode.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -6,13 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct inode {
-    char file_name[30];
-    int size;
-    char group[15];
-    char user[15];
-    
-};
+// struct inode {
+//     char file_name[30];
+//     u_int32_t size;
+//     // char group[15];
+//     // char user[15];
+// };
 
 
 // MOVE TO HEADERFILE
