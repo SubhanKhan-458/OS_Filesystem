@@ -5,14 +5,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include<math.h>
+#include <math.h>
 #include <fcntl.h>
 
-#define DISK_BLOCKS 131072        // 512M/4096 = 131072
+#define DISK_BLOCKS 131072 // 512M/4096 = 131072
 #define BLOCK_SIZE 4096           
 #define NO_OF_INODES 78644 //60% -> 78644  | 70% -> 87659 | 80% -> 98765     
-#define NO_OF_FILE_DESCRIPTORS 3
-//standard 32 
+#define NO_OF_FILE_DESCRIPTORS 3 //standard 32 
 
 struct inode // 4Byte +
 {

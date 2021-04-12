@@ -1,10 +1,19 @@
-#include<inode.h>
+// #include "inode.h"
 
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+
+struct inode {
+    char file_name[30];
+    int size;
+    char group[15];
+    char user[15];
+    
+};
+
 
 // MOVE TO HEADERFILE
 #define BLOCK_SIZE 4 // 4 -> 4096 => 4KB Block
