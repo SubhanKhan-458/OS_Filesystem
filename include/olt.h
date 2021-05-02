@@ -25,13 +25,17 @@ struct index_block_bitmap {
 
 typedef struct index_block_bitmap index_block_bitmap;
 
+// TODO: determine size
+struct data_bitmap {
+    char bitmap[NO_OF_DATA_BLOCKS];
+};
+
+
+typedef struct data_bitmap data_bitmap;
+
 inode_bitmap INODE_BITMAP;
 index_block_bitmap INDEX_BLOCK_BITMAP;
-
-// TODO: determine size
-// struct data_bitmap {
-//     char bitmap[]
-// };
+data_bitmap DATA_BITMAP;
 
 void initialize_inode_bitmap(int * device_descriptor);
 

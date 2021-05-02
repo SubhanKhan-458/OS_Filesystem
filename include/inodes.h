@@ -40,6 +40,7 @@ typedef struct single_indirect_block single_indirect_block; // 113 blocks
 
 void initialize_inode_blocks(int * device_descriptor);
 void write_inode(int * device_descriptor, inode * buffer, int inode_index);
+void read_inode(int * device_descriptor, inode * buffer, int inode_index);
 int get_inode_block_no(int inode_index);
 
 #endif

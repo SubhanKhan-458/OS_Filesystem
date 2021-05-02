@@ -18,4 +18,6 @@
 #define INDEX_BLOCK_NO 274 // 274 - 450 = 176
 #define DATA_BLOCK_NO 451
 
+#define NO_OF_DATA_BLOCKS (NO_OF_BLOCKS - DATA_BLOCK_NO)
+
 #endif
