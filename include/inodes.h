@@ -5,6 +5,7 @@
 
 #define IS_A_DIRECTORY 0
 #define IS_A_FILE 1
+#define IS_EMPTY 2
 
 // Indexed Allocation
 #define DIRECT_BLOCKS 10
@@ -36,5 +37,9 @@ struct single_indirect_block {
 };
 
 typedef struct single_indirect_block single_indirect_block; // 113 blocks
+
+void initialize_inode_blocks(int * device_descriptor);
+void write_inode(int * device_descriptor, inode * buffer, int inode_index);
+int get_inode_block_no(int inode_index);
 
 #endif

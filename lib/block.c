@@ -18,7 +18,7 @@ void openDisk(char * path, int * diskID) {
     }
 }
 
-int readBlock(int * descriptor, char * buffer, int blockNo) {
+int readBlock(int * descriptor, void * buffer, int blockNo) {
     if (*descriptor < 0) {
         perror("disk");
         return 0;
@@ -38,7 +38,7 @@ int readBlock(int * descriptor, char * buffer, int blockNo) {
 
     int totalBlocks = offset / BLOCK_SIZE;
     if (totalBlocks < blockNo) {
-        printf("Error: total blocks are less than block no. [readBlock]");
+        printf("Error: total blocks are less than block no. [readBlock]\n");
         return 0;
     }
 
@@ -55,7 +55,7 @@ int readBlock(int * descriptor, char * buffer, int blockNo) {
     return 1;
 }
 
-int writeBlock(int * descriptor, char * buffer, int blockNo) {
+int writeBlock(int * descriptor, void * buffer, int blockNo) {
     if (*descriptor < 0) {
         perror("disk");
         return 0;

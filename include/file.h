@@ -5,6 +5,7 @@
 
 #define MAX_FILENAME_LENGTH 30
 
+// 30 + 4 = 34 BYTES
 struct file_obj {
     char filename[MAX_FILENAME_LENGTH];
     u_int32_t index_node;

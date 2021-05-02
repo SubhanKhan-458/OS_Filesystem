@@ -1,3 +1,19 @@
 # utility executable
 fs_utils
 test
+olt
+inodes
+
+# dummy files
+foo.txt
+
+# vscode
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/settings.json
+
+# builds
+build
+
+# CMake
+CMake*
