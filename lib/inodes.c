@@ -69,6 +69,43 @@ void write_inode(int * device_descriptor, inode * buffer, int inode_index) {
     free(inode_block_buffer);
 }
 
+void reset_inode(int * device_descriptor, int inode_index) {
+    if (*device_descriptor < 0) {
+        return;
+    }
+
+    inode * buffer = (inode *) malloc(sizeof(inode));
+
+    buffer->size = 0;
+    buffer->type = IS_EMPTY;
+
+    write_inode(device_descriptor, buffer, inode_index);
+}
+
+void read_inode(int * device_descriptor, inode * buffer, int inode_index) {
+    if (*device_descriptor < 0) {
+        return;
+    }
+
+    int block_no = get_inode_block_no(inode_index);
+    char * inode_block_buffer = (char *) malloc(BLOCK_SIZE);
+    int index_in_block = inode_index - ((GET_INODES_PER_BLOCK(sizeof(inode))) * block_no);
+
+    if (block_no > NO_OF_INODE_BLOCKS || block_no < 0 || index_in_block < 0 || index_in_block > (NO_OF_INODES - 1)) {
+        free(inode_block_buffer);
+        return;
+    }
+
+    if (readBlock(device_descriptor, (void *) inode_block_buffer, block_no) == 0) {
+        free(inode_block_buffer);
+        return; // would cause mem leak on return here
+    }
+
+    memcpy(inode_block_buffer + (index_in_block * sizeof(inode)), buffer, sizeof(inode));
+
+    free(inode_block_buffer);
+}
+
 int get_inode_block_no(int inode_index) {
     const ssize_t NO_OF_INODES_PER_BLOCK = GET_INODES_PER_BLOCK(sizeof(inode));
 
