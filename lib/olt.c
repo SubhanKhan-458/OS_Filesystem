@@ -15,7 +15,7 @@ void initialize_inode_bitmap(int * device_descriptor) {
         return;
     }
 
-    int i = 0, bitmapIndex = 0, inodeBlockIndex = 0; // INODE_BLOCK_NO;
+    int i = 0, bitmapIndex = 0, inodeBlockIndex = INODE_BLOCK_NO;
 
     inode * inode_buffer = (inode *) malloc(sizeof(inode));
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
@@ -28,8 +28,8 @@ void initialize_inode_bitmap(int * device_descriptor) {
         return; // make a safe exit function later to clean up everything before exiting
     }
 
-    while (i < NO_OF_INODE_BLOCKS) {
-        if (((BLOCK_SIZE - block_offset) < sizeof(inode)) || (inodeBlockIndex == 0 /* INODE_BLOCK_NO */)) {
+    while (i <= NO_OF_INODE_BLOCKS) {
+        if (((BLOCK_SIZE - block_offset) < sizeof(inode)) || (inodeBlockIndex == INODE_BLOCK_NO)) {
             if (readBlock(device_descriptor, (void *) block_buffer, (inodeBlockIndex++)) == 0) {
                 printf("Unable to read block\n");
                 return;
@@ -48,24 +48,25 @@ void initialize_inode_bitmap(int * device_descriptor) {
     free(block_buffer);
 }
 
-int main () {
-    int * fd = (int *) malloc(sizeof(int));
-    openDisk("../foo.txt", fd);
-    // initialize_inode_blocks(fd);
-    initialize_inode_bitmap(fd);
+// Replace INODE_BLOCK_NO with 0 while testing
+// int main () {
+//     int * fd = (int *) malloc(sizeof(int));
+//     openDisk("../foo.txt", fd);
+//     // initialize_inode_blocks(fd);
+//     initialize_inode_bitmap(fd);
 
-    int i = 0;
-    for (i = 0; i < NO_OF_INODES; i++) {
-        if (INODE_BITMAP.bitmap[i] > 0) {
-            printf("%d [%d]\n", INODE_BITMAP.bitmap[i], i);
-        }
-    }
+//     int i = 0;
+//     for (i = 0; i < NO_OF_INODES; i++) {
+//         if (INODE_BITMAP.bitmap[i] == '1') {
+//             printf("%c [%d]\n", INODE_BITMAP.bitmap[i], i);
+//         }
+//     }
 
-    printf("\n");
+//     printf("\n");
 
-    closeDisk(fd);
+//     closeDisk(fd);
 
-    free(fd);
+//     free(fd);
 
-    return 0;
-}
+//     return 0;
+// }

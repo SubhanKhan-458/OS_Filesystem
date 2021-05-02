@@ -65,7 +65,7 @@ void write_inode(int * device_descriptor, inode * buffer, int inode_index) {
         return;
     }
 
-    INODE_BITMAP.bitmap[inode_index] = 1;
+    INODE_BITMAP.bitmap[inode_index] = '1';
     free(inode_block_buffer);
 }
 
