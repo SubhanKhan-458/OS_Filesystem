@@ -1,56 +1,233 @@
 #include "../include/data_blocks.h"
+#include "../include/olt.h"
 
-void write_data(int * device_descriptor, int inode_index, char * buffer, int buffer_size) {
-    inode * inode_buffer = (inode *) malloc(sizeof(inode));
-    char write_buffer[BLOCK_SIZE]; // we portion the buffer in BLOCK_SIZE chunks
+void initialize_data_blocks(int *device_descriptor)
+{
+    char buffer[1] = {'\0'};
+    int i;
 
-    int remaining_bytes = buffer_size;
-    int offset_by = 0;
-    int data_block_index, i, write_block_res = -1;
-    
-    read_inode(device_descriptor, inode_buffer, inode_index);
+    for (i = DATA_BLOCK_NO; i < NO_OF_BLOCKS; i++)
+    {
+        writeBlock(device_descriptor, (void *)buffer, i);
+    }
+}
 
-    while (remaining_bytes > 0) {
-        memcpy(write_buffer, buffer + (offset_by), (remaining_bytes > BLOCK_SIZE ? BLOCK_SIZE : remaining_bytes));
-        offset_by += (remaining_bytes > BLOCK_SIZE) ? BLOCK_SIZE : remaining_bytes;
-        remaining_bytes -= (remaining_bytes > BLOCK_SIZE) ? BLOCK_SIZE : remaining_bytes;
+int remaining_block_lookup(int *device_descriptor, inode *inode_buff, int buffer_size, int *remaining_size)
+{
+    int i, j, datablock_index;
+    char read_buff[BLOCK_SIZE];
 
-        if ((data_block_index = get_empty_data_block()) < 0) {
-            free(inode_buffer);
-            return;
-        }
-
-        for (i = 0; i < DIRECT_BLOCKS; i++) {
-            if (inode_buffer->index_pointers[i] == 0) {
-                if ((write_block_res = writeBlock(device_descriptor, (void *) write_buffer, (DATA_BLOCK_NO + data_block_index))) == 0) {
-                    free(inode_buffer);
-                    return;
-                }
-
-                inode_buffer->index_pointers[i] = data_block_index;
-                break;
+    for (i = 0; i < DIRECT_BLOCKS; i++)
+    {
+        datablock_index = inode_buff->index_pointers[i];
+        if (datablock_index != -1)
+        {
+            readBlock(device_descriptor, read_buff, (DATA_BLOCK_NO + datablock_index));
+            j = 0;
+            while (read_buff[j] != '\0')
+            {
+                j++;
             }
-        }
 
-        if (write_block_res < 0) {
-            // check single indirects here and assign accordingly
-        } else {
-            write_block_res = -1;
+            if ((BLOCK_SIZE - j) > buffer_size)
+            {
+                *remaining_size = j;
+                return (DATA_BLOCK_NO + datablock_index);
+            }
         }
     }
 
-    // find data block here
+    single_indirect_block *indirect_node_buff = (single_indirect_block *)malloc(sizeof(single_indirect_block));
+    int k;
 
+    for (; i < (DIRECT_BLOCKS + INDIRECT_DEPTH); i++)
+    {
+        if (inode_buff->index_pointers[i] != -1)
+        {
+            // fetch single_indirect node
+            read_indirect_node(device_descriptor, indirect_node_buff, inode_buff->index_pointers[i]);
+
+            for (k = 0; k < DIRECT_BLOCKS; k++)
+            {
+                datablock_index = indirect_node_buff->index_pointers[k];
+                if (datablock_index != -1)
+                {
+                    readBlock(device_descriptor, read_buff, (DATA_BLOCK_NO + datablock_index));
+                    j = 0;
+                    while (read_buff[j] != '\0')
+                    {
+                        j++;
+                    }
+
+                    if ((BLOCK_SIZE - j) > buffer_size)
+                    {
+                        *remaining_size = j;
+                        return (DATA_BLOCK_NO + datablock_index);
+                    }
+                }
+            }
+        }
+    }
+
+    free(indirect_node_buff);
+
+    return -1;
 }
 
-int get_empty_data_block() {
+int free_block_lookup()
+{
     int i;
 
-    for (i = 0; i < NO_OF_DATA_BLOCKS; i++) {
-        if (DATA_BITMAP.bitmap[i] == '0') {
-            return i;
+    for (i = 0; i < NO_OF_DATA_BLOCKS; i++)
+    {
+        if (DATA_BITMAP.bitmap[i] == '0')
+        {
+            return (DATA_BLOCK_NO + i);
         }
     }
 
     return -1;
+}
+
+void write_data(int *device_descriptor, int inode_index, char *buffer, int buffer_size)
+{
+    inode *inode_buffer = (inode *)malloc(sizeof(inode));
+    char write_buffer[BLOCK_SIZE]; // we portion the buffer in BLOCK_SIZE chunks
+
+    int remaining_bytes = buffer_size, blocks_written = 0, data_block_index;
+    int i, j, write_block_flag = 0, empty_indirect_node;
+
+    single_indirect_block *indirect_node_buffer;
+
+    while (remaining_bytes >= BLOCK_SIZE)
+    {
+        memcpy(write_buffer, buffer + (blocks_written * (BLOCK_SIZE)), (BLOCK_SIZE - 1));
+        write_buffer[BLOCK_SIZE] = '\0';
+
+        remaining_bytes -= (BLOCK_SIZE - 1);
+
+        for (i = 0; i < DIRECT_BLOCKS; i++)
+        {
+            if (inode_buffer->index_pointers[i] == -1)
+            {
+                data_block_index = free_block_lookup();
+                writeBlock(device_descriptor, write_buffer, data_block_index);
+
+                blocks_written++;
+                write_block_flag = 1;
+                break;
+            }
+        }
+
+        if (write_block_flag == 1)
+        {
+            write_block_flag = 0;
+            continue;
+        }
+
+        for (i; i < INDIRECT_DEPTH + DIRECT_BLOCKS; i++)
+        {
+            if (inode_buffer->index_pointers[i] == -1)
+            {
+                indirect_node_buffer = (single_indirect_block *)malloc(sizeof(single_indirect_block));
+                empty_indirect_node = get_empty_index_block_index();
+                data_block_index = free_block_lookup();
+                indirect_node_buffer->index_pointers[0] = data_block_index;
+                write_indirect_node(device_descriptor, indirect_node_buffer, empty_indirect_node);
+                inode_buffer->index_pointers[i] = empty_indirect_node;
+                write_inode(device_descriptor, inode_buffer, inode_index);
+                writeBlock(device_descriptor, write_buffer, data_block_index);
+
+                blocks_written++;
+                write_block_flag = 1;
+                free(indirect_node_buffer);
+                break;
+            }
+            else
+            {
+                indirect_node_buffer = (single_indirect_block *)malloc(sizeof(single_indirect_block));
+                read_indirect_node(device_descriptor, indirect_node_buffer, inode_buffer->index_pointers[i]);
+                for (j = 0; j < DIRECT_BLOCKS; j++)
+                {
+                    if (indirect_node_buffer->index_pointers[j] == -1)
+                    {
+                        data_block_index = free_block_lookup();
+                        writeBlock(device_descriptor, write_buffer, data_block_index);
+
+                        blocks_written++;
+                        write_block_flag = 1;
+                        break;
+                    }
+                }
+
+                if (write_block_flag == 1)
+                {
+                    break;
+                }
+                free(indirect_node_buffer);
+            }
+        }
+
+        if (write_block_flag != 1)
+        {
+            continue; // problem writing
+        }
+    }
+
+    int *available_bytes = (int *)malloc(sizeof(int));
+    char *remaining_buff = (char *)malloc(sizeof(char) * remaining_bytes + 1);
+    data_block_index = remaining_block_lookup(device_descriptor, inode_buffer, (remaining_bytes + 1), available_bytes);
+    memcpy(remaining_buff, buffer + (blocks_written * BLOCK_SIZE), remaining_bytes);
+    remaining_buff[(sizeof(char) * remaining_bytes)] = '\0';
+    if (data_block_index != -1)
+    {
+        readBlock(device_descriptor, write_buffer, data_block_index);
+        memcpy(write_buffer + (*available_bytes), remaining_buff, remaining_bytes);
+        return;
+    }
+    else
+    {
+        for (i = 0; i < DIRECT_BLOCKS; ++i)
+        {
+            if (inode_buffer->index_pointers[i] == -1)
+            {
+                data_block_index = free_block_lookup();
+                writeBlock(device_descriptor, remaining_buff, data_block_index);
+                return;
+            }
+        }
+        for (i; i < DIRECT_BLOCKS + INDIRECT_DEPTH; ++i)
+        {
+
+            if (inode_buffer->index_pointers[i] == -1)
+            {
+                indirect_node_buffer = (single_indirect_block *)malloc(sizeof(single_indirect_block));
+                empty_indirect_node = get_empty_index_block_index();
+                data_block_index = free_block_lookup();
+                indirect_node_buffer->index_pointers[0] = data_block_index;
+                write_indirect_node(device_descriptor, indirect_node_buffer, empty_indirect_node);
+                inode_buffer->index_pointers[i] = empty_indirect_node;
+                write_inode(device_descriptor, inode_buffer, inode_index);
+                writeBlock(device_descriptor, remaining_buff, data_block_index);
+                free(indirect_node_buffer);
+                return;
+            }
+            else
+            {
+                indirect_node_buffer = (single_indirect_block *)malloc(sizeof(single_indirect_block));
+                read_indirect_node(device_descriptor, indirect_node_buffer, inode_buffer->index_pointers[i]);
+                for (j = 0; j < DIRECT_BLOCKS; j++)
+                {
+                    if (indirect_node_buffer->index_pointers[j] == -1)
+                    {
+                        data_block_index = free_block_lookup();
+                        writeBlock(device_descriptor, remaining_buff, data_block_index);
+                        free(indirect_node_buffer);
+                        return;
+                    }
+                }
+                free(indirect_node_buffer);
+            }
+        }
+    }
 }

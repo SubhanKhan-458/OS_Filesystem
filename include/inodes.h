@@ -26,14 +26,14 @@ struct inode {
     time_t last_accessed; // 8 BYTES
     time_t last_changed; // 8 BYTES
     time_t created_at; // 8 BYTES
-    u_int32_t index_pointers[DIRECT_BLOCKS + INDIRECT_DEPTH]; // 4 * (10 + 2) BYTES
+    int32_t index_pointers[DIRECT_BLOCKS + INDIRECT_DEPTH]; // 4 * (10 + 2) BYTES
 };
 
 typedef struct inode inode;
 
 // stored as a node, rather than a whole block
 struct single_indirect_block {
-    u_int32_t index_pointers[DIRECT_BLOCKS]; // 40 BYTES
+    int32_t index_pointers[DIRECT_BLOCKS]; // 40 BYTES
 };
 
 typedef struct single_indirect_block single_indirect_block; // 113 blocks
@@ -42,5 +42,8 @@ void initialize_inode_blocks(int * device_descriptor);
 void write_inode(int * device_descriptor, inode * buffer, int inode_index);
 void read_inode(int * device_descriptor, inode * buffer, int inode_index);
 int get_inode_block_no(int inode_index);
+int get_indirect_block_no(int indirect_node_index);
+void write_indirect_node(int * device_descriptor, single_indirect_block * buffer, int indirect_node_index);
+void read_indirect_node(int * device_descriptor, single_indirect_block * buffer, int indirect_node_index);
 
 #endif

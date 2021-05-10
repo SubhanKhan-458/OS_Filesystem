@@ -39,6 +39,7 @@ void initialize_inode_blocks(int * device_descriptor) {
     free(inode_block_buffer);
 }
 
+// in buffer, set index_pointers to -1
 void write_inode(int * device_descriptor, inode * buffer, int inode_index) {
     if (*device_descriptor < 0) {
         return;
@@ -110,6 +111,89 @@ int get_inode_block_no(int inode_index) {
     const ssize_t NO_OF_INODES_PER_BLOCK = GET_INODES_PER_BLOCK(sizeof(inode));
 
     return (inode_index == 0 ? 0 : (inode_index / NO_OF_INODES_PER_BLOCK));
+}
+
+void initialize_indirect_node_blocks(int * device_descriptor) {
+    if (*device_descriptor < 0) {
+        return;
+    }
+
+    int i, indirect_nodeBlockIndex = INDEX_BLOCK_NO;
+    const ssize_t NO_OF_INDIRECT_NODES_PER_BLOCK = (BLOCK_SIZE / sizeof(single_indirect_block));
+    single_indirect_block * indirect_node_block_buffer = (single_indirect_block *) malloc(sizeof(single_indirect_block) * NO_OF_INDIRECT_NODES_PER_BLOCK);
+
+    for (i = 0; i < NO_OF_INDIRECT_NODES_PER_BLOCK; i++) {
+        memset(indirect_node_block_buffer[i].index_pointers, -1, DIRECT_BLOCKS);
+    }
+
+    for (i = 0; i < NO_OF_INDIRECT_NODES_PER_BLOCK; i++) {
+        if (writeBlock(device_descriptor, (void *) indirect_node_block_buffer, (indirect_nodeBlockIndex++)) == 0) {
+            printf("Unable to write block\n");
+            return;
+        }
+    }
+
+    free(indirect_node_block_buffer);
+}
+
+int get_indirect_block_no(int indirect_node_index) {
+    const ssize_t NO_OF_INDIRECT_NODES_PER_BLOCK = GET_INDIRECT_NODES_PER_BLOCK(sizeof(single_indirect_block));
+
+    return (indirect_node_index == 0 ? 0 : (indirect_node_index / NO_OF_INDIRECT_NODES_PER_BLOCK));
+}
+
+void write_indirect_node(int * device_descriptor, single_indirect_block * buffer, int indirect_node_index) {
+        if (*device_descriptor < 0) {
+        return;
+    }
+
+    int block_no = get_indirect_block_no(indirect_node_index);
+    char * indirect_block_buffer = (char *) malloc(BLOCK_SIZE);
+    int index_in_block = indirect_node_index - ((GET_INDIRECT_NODES_PER_BLOCK(sizeof(single_indirect_block))) * block_no);
+
+    if (block_no > NO_OF_INDEX_NODE_BLOCKS || block_no < 0 || index_in_block < 0 || index_in_block > (GET_INDIRECT_NODES_PER_BLOCK(sizeof(single_indirect_block)))) {
+        free(indirect_block_buffer);
+        return;
+    }
+
+    if (readBlock(device_descriptor, (void *) indirect_block_buffer, block_no) == 0) {
+        free(indirect_block_buffer);
+        return; // would cause mem leak on return here
+    }
+
+    memcpy(indirect_block_buffer + (index_in_block * sizeof(single_indirect_block)), buffer, sizeof(single_indirect_block));
+
+    if (writeBlock(device_descriptor, (void *) indirect_block_buffer, block_no) == 0) {
+        free(indirect_block_buffer);
+        return;
+    }
+
+    INDEX_BLOCK_BITMAP.bitmap[indirect_node_index] = '1';
+    free(indirect_block_buffer);
+}
+
+void read_indirect_node(int * device_descriptor, single_indirect_block * buffer, int indirect_node_index) {
+    if (*device_descriptor < 0) {
+        return;
+    }
+
+    int block_no = get_indirect_block_no(indirect_node_index);
+    char * indirect_node_block_buffer = (char *) malloc(BLOCK_SIZE);
+    int index_in_block = indirect_node_index - ((GET_INDIRECT_NODES_PER_BLOCK(sizeof(single_indirect_block))) * block_no);
+
+    if (block_no > NO_OF_INDEX_NODE_BLOCKS || block_no < 0 || index_in_block < 0 || index_in_block > (GET_INDIRECT_NODES_PER_BLOCK(sizeof(single_indirect_block)))) {
+        free(indirect_node_block_buffer);
+        return;
+    }
+
+    if (readBlock(device_descriptor, (void *) indirect_node_block_buffer, block_no) == 0) {
+        free(indirect_node_block_buffer);
+        return; // would cause mem leak on return here
+    }
+
+    memcpy(indirect_node_block_buffer + (index_in_block * sizeof(single_indirect_block)), buffer, sizeof(single_indirect_block));
+
+    free(indirect_node_block_buffer);
 }
 
 // int main () {

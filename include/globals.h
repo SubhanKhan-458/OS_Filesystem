@@ -11,6 +11,7 @@
 #define NO_OF_INODE_BLOCKS ((int) (NO_OF_BLOCKS * 0.0015)) // 0.15% of total blocks
 #define GET_NO_OF_INODES(sizeof_inode) ((int) ((BLOCK_SIZE / sizeof_inode) * NO_OF_INODE_BLOCKS))
 #define GET_INODES_PER_BLOCK(sizeof_inode) ((int) (BLOCK_SIZE / sizeof_inode))
+#define GET_INDIRECT_NODES_PER_BLOCK(sizeof_indirect_node) ((int) (BLOCK_SIZE / sizeof_indirect_node))
 
 #define SUPERBLOCK_BLOCK_NO 0
 #define FILE_MAP_BLOCK_NO 1 // 1 - 76 = 75
@@ -19,5 +20,6 @@
 #define DATA_BLOCK_NO 451
 
 #define NO_OF_DATA_BLOCKS (NO_OF_BLOCKS - DATA_BLOCK_NO)
+#define NO_OF_INDEX_NODE_BLOCKS (DATA_BLOCK_NO - INDEX_BLOCK_NO - 1)
 
 #endif
