@@ -40,6 +40,7 @@ data_bitmap DATA_BITMAP;
 
 void initialize_inode_bitmap(int * device_descriptor);
 void initialize_index_block_bitmap(int * device_descriptor);
+void initialize_data_block_bitmap(int * device_descriptor);
 int get_empty_inode_index();
 int get_empty_index_block_index();
 int get_empty_data_block_index();

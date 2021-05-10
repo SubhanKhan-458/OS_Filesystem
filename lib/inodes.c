@@ -15,7 +15,7 @@ void initialize_inode_blocks(int * device_descriptor) {
         return;
     }
 
-    int i, inodeBlockIndex = INODE_BLOCK_NO;
+    int i, j, inodeBlockIndex = INODE_BLOCK_NO;
     const ssize_t NO_OF_INODES_PER_BLOCK = (BLOCK_SIZE / sizeof(inode));
     // inode inode_buffer = {
     //     .size = 0,
@@ -27,6 +27,9 @@ void initialize_inode_blocks(int * device_descriptor) {
         // memcpy(inode_block_buffer + (i * sizeof(inode)), &inode_buffer, sizeof(inode));
         inode_block_buffer[i].size = 0;
         inode_block_buffer[i].type = IS_EMPTY;
+        for (j = 0; j < (DIRECT_BLOCKS + INDIRECT_DEPTH); j++) {
+            inode_block_buffer[i].index_pointers[j] = -1;
+        }
     }
 
     for (i = 0; i < NO_OF_INODE_BLOCKS; i++) {

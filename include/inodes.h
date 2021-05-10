@@ -26,14 +26,14 @@ struct inode {
     time_t last_accessed; // 8 BYTES
     time_t last_changed; // 8 BYTES
     time_t created_at; // 8 BYTES
-    int32_t index_pointers[DIRECT_BLOCKS + INDIRECT_DEPTH]; // 4 * (10 + 2) BYTES
+    int index_pointers[DIRECT_BLOCKS + INDIRECT_DEPTH]; // 4 * (10 + 2) BYTES
 };
 
 typedef struct inode inode;
 
 // stored as a node, rather than a whole block
 struct single_indirect_block {
-    int32_t index_pointers[DIRECT_BLOCKS]; // 40 BYTES
+    int index_pointers[DIRECT_BLOCKS]; // 40 BYTES
 };
 
 typedef struct single_indirect_block single_indirect_block; // 113 blocks

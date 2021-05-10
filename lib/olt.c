@@ -75,12 +75,44 @@ void initialize_index_block_bitmap(int * device_descriptor) {
         }
 
         // exception check?
-        memcpy(index_node_buffer, block_buffer + (block_offset), sizeof(inode));
+        memcpy(index_node_buffer, block_buffer + (block_offset), sizeof(single_indirect_block));
         INDEX_BLOCK_BITMAP.bitmap[bitmapIndex++] = (index_node_buffer->index_pointers[0] >= 0 ? '1' : '0');
-        block_offset += sizeof(inode);
+        block_offset += sizeof(single_indirect_block);
     }
 
     free(index_node_buffer);
+    free(block_buffer);
+}
+
+void initialize_data_block_bitmap(int * device_descriptor) {
+    if (*device_descriptor < 0) {
+        return;
+    }
+
+    int i = 0, bitmapIndex = 0, dataBlockIndex = DATA_BLOCK_NO;
+
+    char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
+
+    if (!block_buffer) {
+        perror("malloc");
+        return; // make a safe exit function later to clean up everything before exiting
+    }
+
+    while (i <= NO_OF_DATA_BLOCKS) {
+        if (readBlock(device_descriptor, (void *) block_buffer, (dataBlockIndex++)) == 0) {
+            printf("Unable to read block\n");
+            return;
+        }
+
+        if (block_buffer[0] == '\0') {
+            DATA_BITMAP.bitmap[i] = '0';
+        } else {
+            DATA_BITMAP.bitmap[i] = '1';
+        }
+
+        i++; // might not read the last block
+    }
+
     free(block_buffer);
 }
 

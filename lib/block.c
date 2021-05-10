@@ -31,12 +31,12 @@ int readBlock(int * descriptor, void * buffer, int blockNo) {
     ssize_t bytes;
     off_t offset;
 
-    if (( offset = lseek(*descriptor, 0, SEEK_END)) == -1) {
-        perror("lseek");
-        return 0;
-    }
+    // if (( offset = lseek(*descriptor, 0, SEEK_END)) == -1) {
+    //     perror("lseek");
+    //     return 0;
+    // }
 
-    int totalBlocks = offset / BLOCK_SIZE;
+    int totalBlocks = NO_OF_BLOCKS; // offset / BLOCK_SIZE;
     if (totalBlocks < blockNo) {
         printf("Error: total blocks are less than block no. [readBlock]\n");
         return 0;
