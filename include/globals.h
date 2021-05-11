@@ -12,7 +12,7 @@
 #define MB_TO_BYTES(n) ((int) (n * 1024 * 1024))
 #define KB_TO_BYTES(n) ((int) (n * 1024))
 
-#define BLOCK_DEVICE_SIZE (MB_TO_BYTES(512)) // 512 MB
+#define BLOCK_DEVICE_SIZE (MB_TO_BYTES(10)) // 512 MB
 #define BLOCK_SIZE (KB_TO_BYTES(4)) // 4 KB
 
 #define TOTAL_NO_OF_BLOCKS ((int) (BLOCK_DEVICE_SIZE / BLOCK_SIZE))
@@ -31,16 +31,25 @@
 #define TOTAL_NO_OF_INDIRECT_NODES(size_of_inode) ((int) (TOTAL_NO_OF_INODES(size_of_inode) * NO_OF_INDIRECT_INDEXES))
 #define TOTAL_NO_OF_INDIRECT_NODE_BLOCKS(size_of_inode, size_of_indirect_node) (((int) (TOTAL_NO_OF_INDIRECT_NODES(size_of_inode) / NO_OF_INDIRECT_NODES_PER_BLOCK(size_of_indirect_node))) + 1)  // add 1 additional block
 
-#define TOTAL_NO_OF_DIRECT_BLOCKS
+#define TOTAL_NO_OF_DATA_BLOCKS(size_of_inode, size_of_dentry, size_of_indirect_node) ((int) (TOTAL_NO_OF_BLOCKS - (TOTAL_NO_OF_INODE_BLOCKS + TOTAL_NO_OF_DENTRY_BLOCKS(size_of_inode, size_of_dentry) + TOTAL_NO_OF_INDIRECT_NODE_BLOCKS(size_of_inode, size_of_indirect_node) + 1))) // + 1 for superblock
+
+#define SIZEOF_INODE sizeof(inode)
+#define SIZEOF_DENTRY sizeof(dentry)
+#define SIZEOF_INDIRECT_NODE sizeof(indirect_node)
 
 #define MAX_FILENAME_LENGTH 32
 
 #define FS_MAGIC_NUMBER 0x534E5300
 
+#define IS_EMPTY_INODE 0
+#define IS_DIR_INODE 1
+#define IS_FILE_INODE 2
+
 #define SUPER_BLOCK_INDEX_NO 0
 #define DENTRY_BLOCKS_INDEX_NO 1
 #define INODE_BLOCKS_INDEX_NO(size_of_inode, size_of_dentry) (DENTRY_BLOCKS_INDEX_NO + TOTAL_NO_OF_DENTRY_BLOCKS(size_of_inode, size_of_dentry))
 #define INDIRECT_NODE_BLOCKS_INDEX_NO(size_of_inode, size_of_dentry) (INODE_BLOCKS_INDEX_NO(size_of_inode, size_of_dentry) + TOTAL_NO_OF_INODE_BLOCKS)
+#define DATA_BLOCKS_INDEX_NO(size_of_inode, size_of_dentry, size_of_indirect_node) (INDIRECT_NODE_BLOCKS_INDEX_NO(size_of_inode, size_of_dentry) + TOTAL_NO_OF_INDIRECT_NODE_BLOCKS(size_of_inode, size_of_indirect_node))
 
 #define pprintf(content) (printf("%s\n", content))
 
@@ -78,5 +87,8 @@ int clean_block(int *, int);
 int clean_all_blocks(int *);
 
 /* lib/inodes.c */
+int initialize_inode_blocks(int *);
+int read_inode(int *, inode *, int);
+void dump_inode(inode *);
 
 #endif

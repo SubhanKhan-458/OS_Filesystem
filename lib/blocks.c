@@ -86,6 +86,16 @@ int write_block(int * fd, void * buffer, int block_no) {
  * @return (int) -1 for error, 1 for ok 
  */
 int clean_block(int * fd, int block_no) {
+    if (fd == NULL || *fd < 0) {
+        pprintf("Invalid parameters provided [clean_block]");
+        return -1;
+    }
+
+    if (block_no < 0 || block_no > TOTAL_NO_OF_BLOCKS) {
+        pprintf("Invalid block_no provided [clean_block]");
+        return -1;
+    }
+
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
         pprintf("Unable to allocate memory [clean_block]");
@@ -113,6 +123,11 @@ int clean_block(int * fd, int block_no) {
  * @return (int) -1 for error, 1 for ok
  */
 int clean_all_blocks(int * fd) {
+    if (fd == NULL || *fd < 0) {
+        pprintf("Invalid parameters provided [clean_all_blocks]");
+        return -1;
+    }
+
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
         pprintf("Unable to allocate memory [clean_all_blocks]");

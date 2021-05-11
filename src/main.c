@@ -9,20 +9,35 @@ int main () {
 
     printf("TOTAL_NO_OF_BLOCKS = %d\n", TOTAL_NO_OF_BLOCKS);
     printf("TOTAL_NO_OF_INODE_BLOCKS = %d\n", TOTAL_NO_OF_INODE_BLOCKS);
-    printf("TOTAL_NO_OF_INDIRECT_NODE_BLOCKS = %d\n", TOTAL_NO_OF_INDIRECT_NODE_BLOCKS(sizeof(inode), sizeof(indirect_node)));
-    printf("TOTAL_NO_OF_DENTRY_BLOCKS = %d\n", TOTAL_NO_OF_DENTRY_BLOCKS(sizeof(inode), sizeof(dentry)));
-    printf("TOTAL_NO_OF_INODES = %d\n", TOTAL_NO_OF_INODES(sizeof(inode)));
-    printf("TOTAL_NO_OF_INDIRECT_NODES = %d\n", TOTAL_NO_OF_INDIRECT_NODES(sizeof(inode)));
-    printf("NO_OF_INODES_PER_BLOCK = %d\n", NO_OF_INODES_PER_BLOCK(sizeof(inode)));
-    printf("NO_OF_INDIRECT_NODES_PER_BLOCK = %d\n", NO_OF_INDIRECT_NODES_PER_BLOCK(sizeof(indirect_node)));
-    printf("NO_OF_DENTRY_PER_BLOCK = %d\n", NO_OF_DENTRY_PER_BLOCK(sizeof(dentry)));
+    printf("TOTAL_NO_OF_INDIRECT_NODE_BLOCKS = %d\n", TOTAL_NO_OF_INDIRECT_NODE_BLOCKS(SIZEOF_INODE, SIZEOF_INDIRECT_NODE));
+    printf("TOTAL_NO_OF_DENTRY_BLOCKS = %d\n", TOTAL_NO_OF_DENTRY_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY));
+    printf("TOTAL_NO_OF_DATA_BLOCKS = %d\n", TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
+    printf("TOTAL_NO_OF_INODES = %d\n", TOTAL_NO_OF_INODES(SIZEOF_INODE));
+    printf("TOTAL_NO_OF_INDIRECT_NODES = %d\n", TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE));
+    printf("NO_OF_INODES_PER_BLOCK = %d\n", NO_OF_INODES_PER_BLOCK(SIZEOF_INODE));
+    printf("NO_OF_INDIRECT_NODES_PER_BLOCK = %d\n", NO_OF_INDIRECT_NODES_PER_BLOCK(SIZEOF_INDIRECT_NODE));
+    printf("NO_OF_DENTRY_PER_BLOCK = %d\n", NO_OF_DENTRY_PER_BLOCK(SIZEOF_DENTRY));
     printf("SUPER_BLOCK_INDEX_NO = %d\n", SUPER_BLOCK_INDEX_NO);
     printf("DENTRY_BLOCKS_INDEX_NO = %d\n", DENTRY_BLOCKS_INDEX_NO);
-    printf("INODE_BLOCKS_INDEX_NO = %d\n", INODE_BLOCKS_INDEX_NO(sizeof(inode), sizeof(dentry)));
-    printf("INDIRECT_NODE_BLOCKS_INDEX_NO = %d\n", INDIRECT_NODE_BLOCKS_INDEX_NO(sizeof(inode), sizeof(dentry)));
+    printf("INODE_BLOCKS_INDEX_NO = %d\n", INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY));
+    printf("INDIRECT_NODE_BLOCKS_INDEX_NO = %d\n", INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY));
+    printf("DATA_BLOCKS_INDEX_NO = %d\n", DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
 
 
-    // init_dev("/home/shaheer/OS_Filesystem/temp/foo.img", &fd);
+    init_dev("/home/shaheer/OS_Filesystem/temp/foo.img", &fd);
+
+    inode temp;
+    if (read_inode(&fd, &temp, 0) != -1) {
+        dump_inode(&temp);
+    }
+
+    if (read_inode(&fd, &temp, 184) != -1) {
+        dump_inode(&temp);
+    }
+
+    if (read_inode(&fd, &temp, 183) != -1) {
+        dump_inode(&temp);
+    }
 
     // temp
     // char * bl = (char *) malloc(sizeof(char) * BLOCK_SIZE);
@@ -30,7 +45,7 @@ int main () {
     // dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "w", bl, BLOCK_SIZE);
     // free(bl);
 
-    // close_dev(&fd);
+    close_dev(&fd);
 
     return 0;
 }
@@ -124,13 +139,26 @@ int init_dev(const char * path, int * fd) {
         sb.magic_number = (u_int32_t) FS_MAGIC_NUMBER;
         sb.total_blocks = (u_int32_t) TOTAL_NO_OF_BLOCKS;
         sb.total_inode_blocks = (u_int32_t) TOTAL_NO_OF_INODE_BLOCKS;
-        sb.total_no_of_inodes = (u_int32_t) TOTAL_NO_OF_INODES(sizeof(inode));
+        sb.total_no_of_inodes = (u_int32_t) TOTAL_NO_OF_INODES(SIZEOF_INODE);
 
         memcpy(block_buffer, &sb, sizeof(super_block));
 
         // write super block
         if (write_block(fd, (void *) block_buffer, SUPER_BLOCK_INDEX_NO) == -1) {
             pprintf("Unable to write super block [init_dev]");
+            free(block_buffer);
+            return -1;
+        }
+
+        // temp - fill dentry so i can test inodes
+        int k = DENTRY_BLOCKS_INDEX_NO;
+        for (; k < INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); k++) {
+            write_block(fd, (void *) block_buffer, k);
+        }
+
+        // write inode blocks
+        if (initialize_inode_blocks(fd) == -1) {
+            pprintf("Unable to write inode blocks [init_dev]");
             free(block_buffer);
             return -1;
         }
