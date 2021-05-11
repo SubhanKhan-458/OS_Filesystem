@@ -88,7 +88,9 @@ int clean_all_blocks(int *);
 
 /* lib/inodes.c */
 int initialize_inode_blocks(int *);
+int write_inode(int *, inode *, int);
 int read_inode(int *, inode *, int);
+int clean_inode(int *, int);
 void dump_inode(inode *);
 
 #endif

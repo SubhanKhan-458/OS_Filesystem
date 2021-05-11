@@ -29,11 +29,17 @@ int main () {
     inode temp;
     if (read_inode(&fd, &temp, 0) != -1) {
         dump_inode(&temp);
+        // temp.size = 4096;
+        // if (write_inode(&fd, &temp, 0) != -1) {
+        //     dump_inode(&temp);
+        // }
     }
 
     if (read_inode(&fd, &temp, 184) != -1) {
         dump_inode(&temp);
     }
+
+    clean_inode(&fd, 183);
 
     if (read_inode(&fd, &temp, 183) != -1) {
         dump_inode(&temp);
