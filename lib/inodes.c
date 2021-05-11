@@ -1,5 +1,20 @@
 #include "../include/globals.h"
 
+/**
+ * @brief Initializes the inode blocks section of the block device
+ * 
+ * Initializes all inodes to "empty states", i.e.
+ * ->size = 0,
+ * ->type = IS_EMPTY_INODE,
+ * ->pointers (each one) = 0,
+ * 
+ * The 0 in pointers indicates empty, the actual indexes can be 
+ * obtained by subtracting 1 from the pointer value (which would be > 0)
+ * (Pointer Value = 1, Actual Index = 1 - 1 => 0)
+ * 
+ * @param fd File descriptor
+ * @return (int) -1 for error, 1 for ok  
+ */
 int initialize_inode_blocks(int * fd) {
     if (fd == NULL || *fd < 0) {
         pprintf("Invalid parameters provided [initialize_inode_blocks]");
@@ -50,6 +65,19 @@ int initialize_inode_blocks(int * fd) {
     return 1;
 }
 
+/**
+ * @brief Writes an inode to the block device file
+ * 
+ * The inode blocks section's starting block no can be 
+ * obtained by the "INODE_BLOCKS_INDEX_NO" macro
+ * 
+ * The inode's indexing begins from 0 till "TOTAL_NO_OF_INODES - 1"
+ * 
+ * @param fd File descriptor
+ * @param buffer The inode buffer, it contains the inode data we want to write
+ * @param inode_index The inode index we want to write to
+ * @return (int) -1 for error, 1 for ok 
+ */
 int write_inode(int * fd, inode * buffer, int inode_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
         pprintf("Invalid parameters provided [write_inode]");
@@ -96,6 +124,14 @@ int write_inode(int * fd, inode * buffer, int inode_index) {
     return 1;
 }
 
+/**
+ * @brief Saves the targetted inode's data to the inode buffer
+ * 
+ * @param fd File descriptor
+ * @param buffer The inode buffer, where we would save the data
+ * @param inode_index The target inode's index
+ * @return (int) -1 for error, 1 for ok 
+ */
 int read_inode(int * fd, inode * buffer, int inode_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
         pprintf("Invalid parameters provided [read_inode]");
@@ -136,6 +172,15 @@ int read_inode(int * fd, inode * buffer, int inode_index) {
     return 1;
 }
 
+/**
+ * @brief Cleans a targetted inode, resetting all attributes to the "empty state"
+ * 
+ * "empty state" has been defined in detail in "initialize_inode_blocks"
+ * 
+ * @param fd File descriptor
+ * @param inode_index The targetted inode's index
+ * @return (int) -1 for error, 1 for ok 
+ */
 int clean_inode(int * fd, int inode_index) {
     inode temp = {
         .size = 0,
@@ -158,6 +203,11 @@ int clean_inode(int * fd, int inode_index) {
     return 1;
 }
 
+/**
+ * @brief Dumps an inode's data to stdout
+ * 
+ * @param buffer The inode whose data we want to dump
+ */
 void dump_inode(inode * buffer) {
     if (buffer == NULL) {
         printf("Invalid parameters provided [dump_inode]");
