@@ -37,6 +37,8 @@ int remaining_block_lookup(int *device_descriptor, inode *inode_buff, int buffer
                 return datablock_index;
             }
         }
+
+        datablock_index = -1;
     }
 
     single_indirect_block *indirect_node_buff = (single_indirect_block *)malloc(sizeof(single_indirect_block));
@@ -67,6 +69,8 @@ int remaining_block_lookup(int *device_descriptor, inode *inode_buff, int buffer
                         return datablock_index;
                     }
                 }
+
+                datablock_index = -1;
             }
         }
     }
