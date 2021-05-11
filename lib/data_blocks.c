@@ -1,6 +1,6 @@
 #include "../include/data_blocks.h"
 #include "../include/olt.h"
-#include<stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 void initialize_data_blocks(int *device_descriptor)
@@ -230,7 +230,7 @@ void write_data(int *device_descriptor, int inode_index, char *buffer, int buffe
                         indirect_node_buffer->index_pointers[j] = data_block_index;
                         write_indirect_node(device_descriptor, indirect_node_buffer, empty_indirect_node);
                         inode_buffer->index_pointers[i] = empty_indirect_node;
-                        write_inode(device_descriptor, inode_buffer, inode_index);        
+                        write_inode(device_descriptor, inode_buffer, inode_index);
                         writeBlock(device_descriptor, remaining_buff, data_block_index);
                         free(indirect_node_buffer);
                         return;
@@ -244,31 +244,32 @@ void write_data(int *device_descriptor, int inode_index, char *buffer, int buffe
 
 void read_data(int *device_descriptor, int inode_index, char *buffer, int buffer_size)
 {
-    inode* buff = (inode*)malloc(sizeof (inode));
+    inode *buff = (inode *)malloc(sizeof(inode));
 
-    read_inode(device_descriptor,buff,inode_index);
-    int i=0;
-    for(i;i<DIRECT_BLOCKS;i++){
-        if(buff->index_pointers[i]!=-1){
-            readBlock(device_descriptor,(void*)buffer,DATA_BLOCK_NO+buff->index_pointers[i]);
+    read_inode(device_descriptor, buff, inode_index);
+    int i = 0;
+    for (i; i < DIRECT_BLOCKS; i++)
+    {
+        if (buff->index_pointers[i] != -1)
+        {
+            readBlock(device_descriptor, (void *)buffer,buff->index_pointers[i]);
             free(buff);
             return;
         }
     }
-
-
 }
 
-int main () {
-    int * fd = (int *) malloc(sizeof(int));
+int main()
+{
+    int *fd = (int *)malloc(sizeof(int));
     openDisk("foo.txt", fd);
 
-
     int i = 0;
-    char * block = (char *) malloc(BLOCK_SIZE);
+    char *block = (char *)malloc(BLOCK_SIZE);
 
-    for (; i < INODE_BLOCK_NO; i++) {
-        writeBlock(fd, (void *) block, i);
+    for (; i < INODE_BLOCK_NO; i++)
+    {
+        writeBlock(fd, (void *)block, i);
     }
 
     initialize_inode_blocks(fd);
@@ -278,19 +279,20 @@ int main () {
     initialize_data_blocks(fd);
     initialize_data_block_bitmap(fd);
 
-    char * buff = "HELLO WORLD!";
-    char *readBuff = (char *) malloc(BLOCK_SIZE);
-    write_data(fd, 0, buff, 12);
-    read_data(fd,0,readBuff,BLOCK_SIZE);
+    char *buff = "HELLO WORLD! SNS Algorithm";
+    char *readBuff = (char *)malloc(BLOCK_SIZE);
+    write_data(fd, 0, buff, 40);
+    read_data(fd, 0, readBuff, BLOCK_SIZE);
 
-    FILE * f = fopen("newfile.txt","w");
-    for (i = 0; i < 4096; i++) fprintf(f,"%c ",readBuff[i]);
+    FILE *f = fopen("newfile.txt", "w");
+    for (i = 0; i < 4096; i++)
+        fprintf(f, "%c ", readBuff[i]);
     fclose(f);
     printf("\n");
-    
+
     free(readBuff);
     free(block);
-    
+
     closeDisk(fd);
 
     free(fd);
