@@ -77,6 +77,11 @@ int init_dev(const char * path, int * fd) {
     // then no need to initialize inodes and everything, just the bitmaps
     // else initialize everything from scratch
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
+    if (block_buffer == NULL) {
+        pprintf("Unable to allocate memory [init_dev]");
+        perror("malloc");
+        return -1;
+    }
 
     if (read_block(fd, (void *) block_buffer, 0) == -1) {
         pprintf("Unable to read_block [init_dev]");
@@ -91,6 +96,7 @@ int init_dev(const char * path, int * fd) {
         // initialize inode blocks, data blocks etc.
         // everything gets initialized from scratch
         // first time
+        clean_all_blocks(fd); // clean all the blocks first
     }
 
     // initialize bitmaps here

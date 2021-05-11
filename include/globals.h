@@ -22,5 +22,6 @@
 
 int read_block(int *, void *, int);
 int write_block(int *, void *, int);
+int clean_all_blocks(int *);
 
 #endif
