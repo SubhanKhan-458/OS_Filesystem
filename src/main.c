@@ -14,6 +14,7 @@ int main () {
     printf("TOTAL_NO_OF_DATA_BLOCKS = %d\n", TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
     printf("TOTAL_NO_OF_INODES = %d\n", TOTAL_NO_OF_INODES(SIZEOF_INODE));
     printf("TOTAL_NO_OF_INDIRECT_NODES = %d\n", TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE));
+    printf("TOTAL_NO_OF_DENTRY = %d\n", TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY));
     printf("NO_OF_INODES_PER_BLOCK = %d\n", NO_OF_INODES_PER_BLOCK(SIZEOF_INODE));
     printf("NO_OF_INDIRECT_NODES_PER_BLOCK = %d\n", NO_OF_INDIRECT_NODES_PER_BLOCK(SIZEOF_INDIRECT_NODE));
     printf("NO_OF_DENTRY_PER_BLOCK = %d\n", NO_OF_DENTRY_PER_BLOCK(SIZEOF_DENTRY));
@@ -53,8 +54,24 @@ int main () {
         }
     }
 
+    if (read_indirect_node(&fd, &temp_indirect_node, 1) != -1) {
+        dump_indirect_node(&temp_indirect_node);
+    }
+
+    if (read_indirect_node(&fd, &temp_indirect_node, 360) != -1) {
+        dump_indirect_node(&temp_indirect_node);
+    }
+
     dentry temp_dentry;
     if (read_dentry(&fd, &temp_dentry, 0) != -1) {
+        dump_dentry(&temp_dentry);
+    }
+
+    if (read_dentry(&fd, &temp_dentry, 226) != -1) {
+        dump_dentry(&temp_dentry);
+    }
+
+    if (read_dentry(&fd, &temp_dentry, 184) != -1) {
         dump_dentry(&temp_dentry);
     }
 
