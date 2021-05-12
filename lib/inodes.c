@@ -247,3 +247,92 @@ void dump_inode(inode * buffer) {
 
     return;
 }
+
+int initialize_inode_bitmap(int * fd) {
+    if (fd == NULL || *fd < 0) {
+        pprintf("Invalid parameters provided [initialize_inode_bitmap]");
+        return -1;
+    }
+
+    inode temp_inode;
+    indirect_node temp_indirect_node;
+
+    char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
+    if (block_buffer == NULL) {
+        pprintf("Unable to allocate memory [initialize_inode_bitmap]");
+        perror("malloc");
+        return -1;
+    }
+
+    int i, j, k, l, bitmap_index = 0, data_block_index, indirect_node_index;
+    int data_block_index_no = DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE);
+
+    for (i = INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); i < INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); i++) {
+        if (read_block(fd, (void *) block_buffer, i) == -1) {
+            pprintf("Unable to read block [initialize_inode_bitmap]");
+            free(block_buffer);
+            return -1;
+        }
+
+        for (j = 0; j < NO_OF_INODES_PER_BLOCK(SIZEOF_INODE); j++) {
+            memcpy(&temp_inode, block_buffer + (j * SIZEOF_INODE), SIZEOF_INODE);
+            inodes_bitmap[bitmap_index++] = (temp_inode.type != IS_EMPTY_INODE ? 1 : 0);
+            // fill in the indirect_node and data_block bitmap through the inode pointers
+            if (temp_inode.type != IS_EMPTY_INODE) {
+                for (k = 0; k < (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES); k++) {
+                    if (k < NO_OF_DIRECT_INDEXES) {
+                        data_block_index = temp_inode.pointers[k];
+                        if (data_block_index != 0) {
+                            // should point to absolute data_blocks
+                            // not relative (relative => start from 0)
+                            // since it is absolute, we need to subtract DATA_BLOCK_INDEX_NO
+                            // to get the bitmap index for it
+                            data_blocks_bitmap[data_block_index - data_block_index_no] = 1;
+                        }
+                    } else {
+                        // this marks the start of indirect node indexes
+                        indirect_node_index = temp_inode.pointers[k];
+                        if (indirect_node_index != 0) {
+                            // indirect_nodes are relative, since 0 signifies -1
+                            // we need to subtract 1 to get the actual index
+                            indirect_nodes_bitmap[(indirect_node_index - 1)] = 1;
+
+                            if (read_indirect_node(fd, &temp_indirect_node, (indirect_node_index - 1)) == -1) {
+                                pprintf("Unable to read indirect node [initialize_inode_bitmap]");
+                                free(block_buffer);
+                                return -1;
+                            }
+
+                            for (l = 0; l < NO_OF_DIRECT_INDEXES; l++) {
+                                data_block_index = temp_indirect_node.pointers[l];
+                                if (data_block_index != 0) {
+                                    data_blocks_bitmap[data_block_index - data_block_index_no] = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    free(block_buffer);
+    return 1;
+}
+
+void dump_inode_bitmap() {
+    int i;
+
+    printf("--------------------------------------------\n");
+    printf("INODE BITMAP\n");
+    printf("--------------------------------------------\n");
+
+    for (i = 0; i < TOTAL_NO_OF_INODES(SIZEOF_INODE); i++) {
+        printf("{[%d] %d} ", i, inodes_bitmap[i]);
+    }
+
+    printf("\n");
+    printf("--------------------------------------------\n");
+
+    return;
+}

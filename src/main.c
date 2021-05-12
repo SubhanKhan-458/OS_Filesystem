@@ -74,6 +74,10 @@ int main () {
     if (read_dentry(&fd, &temp_dentry, 184) != -1) {
         dump_dentry(&temp_dentry);
     }
+    
+    dump_inode_bitmap();
+    dump_indirect_node_bitmap();
+    dump_data_block_bitmap();
 
     // temp
     // char * bl = (char *) malloc(sizeof(char) * BLOCK_SIZE);
@@ -241,6 +245,12 @@ int init_dev(const char * path, int * fd) {
     }
 
     // initialize bitmaps here
+    // inode_bitmap initializes the rest of the bitmaps along with it
+    if (initialize_inode_bitmap(fd) == -1) {
+        pprintf("Unable to initialize inode bitmap [init_dev]");
+        free(block_buffer);
+        return -1;
+    }
 
     free(block_buffer);
 

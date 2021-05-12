@@ -284,3 +284,19 @@ void dump_indirect_node(indirect_node * buffer) {
     return;
 }
 
+void dump_indirect_node_bitmap() {
+    int i;
+
+    printf("--------------------------------------------\n");
+    printf("INDIRECT NODE BITMAP\n");
+    printf("--------------------------------------------\n");
+
+    for (i = 0; i < TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE); i++) {
+        printf("{[%d] %d} ", i, indirect_nodes_bitmap[i]);
+    }
+
+    printf("\n");
+    printf("--------------------------------------------\n");
+
+    return;
+}

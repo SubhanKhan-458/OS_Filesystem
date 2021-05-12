@@ -82,6 +82,10 @@ typedef struct indirect_node {
     int32_t pointers[NO_OF_DIRECT_INDEXES];
 } indirect_node;
 
+u_int8_t data_blocks_bitmap[TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE)];
+u_int8_t inodes_bitmap[TOTAL_NO_OF_INODES(SIZEOF_INODE)];
+u_int8_t indirect_nodes_bitmap[TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE)];
+
 /* lib/blocks.c */
 int read_block(int *, void *, int);
 int write_block(int *, void *, int);
@@ -94,6 +98,9 @@ int write_inode(int *, inode *, int);
 int read_inode(int *, inode *, int);
 int clean_inode(int *, int);
 void dump_inode(inode *);
+int initialize_inode_bitmap(int *);
+int get_free_inode_index();
+void dump_inode_bitmap();
 
 /* lib/indirect_nodes.c */
 int initialize_indirect_node_blocks(int *);
@@ -103,6 +110,7 @@ int write_indirect_node(int *, indirect_node *, int);
 int read_indirect_node(int *, indirect_node *, int);
 int clean_indirect_node(int *, int);
 void dump_indirect_node(indirect_node *);
+void dump_indirect_node_bitmap();
 
 /* lib/dentry.c */
 int initialize_dentry_blocks(int *);
@@ -110,5 +118,8 @@ int write_dentry(int *, dentry *, int);
 int read_dentry(int *, dentry *, int);
 int clean_dentry(int *, int);
 void dump_dentry(dentry *);
+
+/* lib/data_blocks.c */
+void dump_data_block_bitmap();
 
 #endif
