@@ -26,23 +26,36 @@ int main () {
 
     init_dev("/home/shaheer/OS_Filesystem/temp/foo.img", &fd);
 
-    inode temp;
-    if (read_inode(&fd, &temp, 0) != -1) {
-        dump_inode(&temp);
-        // temp.size = 4096;
-        // if (write_inode(&fd, &temp, 0) != -1) {
-        //     dump_inode(&temp);
-        // }
+    inode temp_inode;
+    if (read_inode(&fd, &temp_inode, 0) != -1) {
+        dump_inode(&temp_inode);
+    }
+    
+    indirect_node temp_indirect_node;
+    if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
+        dump_indirect_node(&temp_indirect_node);
+        if (add_pointer_to_indirect_node(&fd, 0, 0, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 1) != -1) {
+            if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
+                dump_indirect_node(&temp_indirect_node);
+            }
+        }
+
+        if (add_pointer_to_indirect_node(&fd, 0, 9, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 8) != -1) {
+            if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
+                dump_indirect_node(&temp_indirect_node);
+            }
+        }
+
+        if (remove_pointer_from_indirect_node(&fd, 0, 0) != -1) {
+            if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
+                dump_indirect_node(&temp_indirect_node);
+            }
+        }
     }
 
-    if (read_inode(&fd, &temp, 184) != -1) {
-        dump_inode(&temp);
-    }
-
-    clean_inode(&fd, 183);
-
-    if (read_inode(&fd, &temp, 183) != -1) {
-        dump_inode(&temp);
+    dentry temp_dentry;
+    if (read_dentry(&fd, &temp_dentry, 0) != -1) {
+        dump_dentry(&temp_dentry);
     }
 
     // temp
@@ -156,15 +169,55 @@ int init_dev(const char * path, int * fd) {
             return -1;
         }
 
-        // temp - fill dentry so i can test inodes
-        int k = DENTRY_BLOCKS_INDEX_NO;
-        for (; k < INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); k++) {
-            write_block(fd, (void *) block_buffer, k);
+        // write dentry blocks
+        if (initialize_dentry_blocks(fd) == -1) {
+            pprintf("Unable to write dentry blocks [init_dev]");
+            free(block_buffer);
+            return -1;
+        }
+
+        // root dentry, represents the "/" directory and root
+        dentry sb_dentry = {
+            .filename = "/",
+            .inode_index = 0,
+        };
+
+        if (write_dentry(fd, &sb_dentry, 0) == -1) {
+            pprintf("Unable to write dentry [init_dev]");
+            free(block_buffer);
+            return -1;
         }
 
         // write inode blocks
         if (initialize_inode_blocks(fd) == -1) {
             pprintf("Unable to write inode blocks [init_dev]");
+            free(block_buffer);
+            return -1;
+        }
+
+        // root inode, represents the "/" directory and super_block
+        // size will be incremented as directories/files are created within
+        // the root
+        inode sb_inode = {
+            .size = sizeof(super_block),
+            .type = IS_DIR_INODE,
+            .uid = 0,
+            .gid = 0,
+            .last_accessed = 0,
+            .last_changed = 0,
+            .created_at = (u_int64_t) time(NULL),
+        };
+
+        memset(sb_inode.pointers, 0, (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES));
+        if (write_inode(fd, &sb_inode, 0) == -1) {
+            pprintf("Unable to write inode [init_dev]");
+            free(block_buffer);
+            return -1;
+        }
+
+        // write indirect node blocks
+        if (initialize_indirect_node_blocks(fd) == -1) {
+            pprintf("Unable to write indirect node blocks [init_dev]");
             free(block_buffer);
             return -1;
         }

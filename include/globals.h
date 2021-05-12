@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -26,6 +27,7 @@
 
 #define NO_OF_DENTRY_PER_BLOCK(size_of_dentry) ((int) (BLOCK_SIZE / size_of_dentry))
 #define TOTAL_NO_OF_DENTRY_BLOCKS(size_of_inode, size_of_dentry) (((int) (TOTAL_NO_OF_INODES(size_of_inode) / NO_OF_DENTRY_PER_BLOCK(size_of_dentry))) + 1) // add 1 additional block
+#define TOTAL_NO_OF_DENTRY(size_of_inode, size_of_dentry) (((int) (TOTAL_NO_OF_DENTRY_BLOCKS(size_of_inode, size_of_dentry) * NO_OF_DENTRY_PER_BLOCK(size_of_dentry))))
 
 #define NO_OF_INDIRECT_NODES_PER_BLOCK(size_of_indirect_node) ((int) (BLOCK_SIZE / size_of_indirect_node))
 #define TOTAL_NO_OF_INDIRECT_NODES(size_of_inode) ((int) (TOTAL_NO_OF_INODES(size_of_inode) * NO_OF_INDIRECT_INDEXES))
@@ -92,5 +94,21 @@ int write_inode(int *, inode *, int);
 int read_inode(int *, inode *, int);
 int clean_inode(int *, int);
 void dump_inode(inode *);
+
+/* lib/indirect_nodes.c */
+int initialize_indirect_node_blocks(int *);
+int add_pointer_to_indirect_node(int *, int, int, int);
+int remove_pointer_from_indirect_node(int *, int, int);
+int write_indirect_node(int *, indirect_node *, int);
+int read_indirect_node(int *, indirect_node *, int);
+int clean_indirect_node(int *, int);
+void dump_indirect_node(indirect_node *);
+
+/* lib/dentry.c */
+int initialize_dentry_blocks(int *);
+int write_dentry(int *, dentry *, int);
+int read_dentry(int *, dentry *, int);
+int clean_dentry(int *, int);
+void dump_dentry(dentry *);
 
 #endif

@@ -32,7 +32,7 @@ int initialize_inode_blocks(int * fd) {
     };
 
     // 0 indicates empty, subtract 1 from pointer to get the actual pointer
-    memset(temp.pointers, 0, (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES));
+    memset(temp.pointers, 0, (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES) * sizeof(int32_t));
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
@@ -105,7 +105,7 @@ int write_inode(int * fd, inode * buffer, int inode_index) {
         return -1;
     }
 
-    if (read_block(fd, (void *) block_buffer, INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY) + block_no) == -1) {
+    if (read_block(fd, (void *) block_buffer, inode_blocks_index + block_no) == -1) {
         pprintf("Unable to read block [write_inode]");
         free(block_buffer);
         return -1;
@@ -114,7 +114,7 @@ int write_inode(int * fd, inode * buffer, int inode_index) {
     int offset = (inode_index - (block_no * NO_OF_INODES_PER_BLOCK(SIZEOF_INODE))) * SIZEOF_INODE;
     memcpy(block_buffer + offset, buffer, SIZEOF_INODE);
 
-    if (write_block(fd, (void *) block_buffer, INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY) + block_no) == -1) {
+    if (write_block(fd, (void *) block_buffer, inode_blocks_index + block_no) == -1) {
         pprintf("Unable to write block [write_inode]");
         free(block_buffer);
         return -1;
@@ -159,7 +159,7 @@ int read_inode(int * fd, inode * buffer, int inode_index) {
         return -1;
     }
 
-    if (read_block(fd, (void *) block_buffer, INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY) + block_no) == -1) {
+    if (read_block(fd, (void *) block_buffer, inode_blocks_index + block_no) == -1) {
         pprintf("Unable to read block [read_inode]");
         free(block_buffer);
         return -1;
@@ -193,7 +193,7 @@ int clean_inode(int * fd, int inode_index) {
     };
 
     // 0 indicates empty, subtract 1 from pointer to get the actual pointer
-    memset(temp.pointers, 0, (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES));
+    memset(temp.pointers, 0, (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES) * sizeof(int32_t));
 
     if (write_inode(fd, &temp, inode_index) == -1) {
         pprintf("Unable to clean inode [clean_inode]");
