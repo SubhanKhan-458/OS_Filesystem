@@ -235,14 +235,18 @@ void dump_indirect_node_bitmap() {
     return;
 }
 
-void dump_data_block_bitmap() {
-    int i;
+void dump_data_block_bitmap(int * limit) {
+    int i, n = TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE);
 
     printf("--------------------------------------------\n");
     printf("DATA BLOCK BITMAP\n");
     printf("--------------------------------------------\n");
 
-    for (i = 0; i < TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE); i++) {
+    if (limit == NULL || *limit < 0 || *limit > n) {
+        *limit = n;
+    }
+
+    for (i = 0; i < *limit; i++) {
         printf("{[%d] %d} ", i, data_blocks_bitmap[i]);
     }
 

@@ -1,6 +1,6 @@
 #include "../include/globals.h"
 
-void dump_to_file(const char *, const char *, char *, int);
+void dump_to_file(const char *, const char *, char *, int, int);
 int init_dev(const char *, int *);
 void close_dev(int *);
 
@@ -77,7 +77,9 @@ int main () {
     
     dump_inode_bitmap();
     dump_indirect_node_bitmap();
-    dump_data_block_bitmap();
+
+    int lim = 50;
+    dump_data_block_bitmap(&lim);
 
     // 13 BYTES
     char * MSG1 = "HELLO WORLD!";
@@ -96,21 +98,28 @@ int main () {
         set_inode_bitmap_value(1, 1);
     }
 
-    // TODO: Fix not writing to indirect node blocks
-    // write_data(&fd, MSG3, 4096, 1);
-    // write_data(&fd, MSG2, 5121, 1);
-    // write_data(&fd, MSG1, 13, 1);
+    // TODO: Fix not properly cascading indirect blocks with additional data
+    write_data(&fd, MSG3, 4096, 1);
+    write_data(&fd, MSG2, 5121, 1);
+    write_data(&fd, MSG1, 13, 1);
 
     read_indirect_node(&fd, &temp_indirect_node, 0);
     dump_indirect_node(&temp_indirect_node);
 
+    read_indirect_node(&fd, &temp_indirect_node, 1);
+    dump_indirect_node(&temp_indirect_node);
+
+    dump_data_block_bitmap(&lim);
+
     // dump_data_block_bitmap();
 
     // temp
-    // char * bl = (char *) malloc(sizeof(char) * BLOCK_SIZE);
-    // read_block(&fd, (void *) bl, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 2);
-    // dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "w", bl, BLOCK_SIZE);
-    // free(bl);
+    char * bl = (char *) malloc(sizeof(char) * BLOCK_SIZE);
+    
+    read_block(&fd, (void *) bl, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 14);
+    dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "w", bl, BLOCK_SIZE, 0);
+
+    free(bl);
 
     close_dev(&fd);
 
@@ -128,7 +137,7 @@ int main () {
  * @param data The data we want to dump
  * @param n Size of data (in bytes)
  */
-void dump_to_file(const char * path, const char * modes, char * data, int n) {
+void dump_to_file(const char * path, const char * modes, char * data, int n, int add_space) {
     FILE * fp = fopen(path, modes);
     int i;
 
@@ -138,7 +147,10 @@ void dump_to_file(const char * path, const char * modes, char * data, int n) {
     }
 
     for (i = 0; (i < n) && (data[i] != '\0'); i++) {
-        fprintf(fp, "%c ", data[i]);
+        fprintf(fp, "%c", data[i]);
+        if (add_space == 1) {
+            fprintf(fp, " ", data[i]);
+        }
     }
 
     fclose(fp);

@@ -141,13 +141,18 @@ int fill_used_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
     }
 
     indirect_node temp_indirect_node;
-    int i;
+    int i, indirect_node_index;
     for (i = NO_OF_DIRECT_INDEXES; i < (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES); i++) {
-        if (inode_buffer->pointers[i] == 0) {
+        indirect_node_index = (inode_buffer->pointers[i] - 1);
+        if (indirect_node_index == -1) {
             continue;
         }
 
-        read_indirect_node(fd, &temp_indirect_node, inode_buffer->pointers[i]);
+        if (read_indirect_node(fd, &temp_indirect_node, indirect_node_index) == -1) {
+            pprintf("Unable to read indirect node [fill_used_blocks]");
+            return -1;
+        }
+
         if (write_remaining_buffer_to_block(fd, block_buffer, buffer, buffer_size, temp_indirect_node.pointers) == 1) {
             free(block_buffer);
             return 1;
@@ -241,8 +246,8 @@ int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
         // Assuming that we'll be moving to data to the earliest empty space avaialable
         // i.e. data from indirect nodes would be moved to direct blocks if space becomes available
         // upon deletion, as a result successive pointers would be empty if previous one is
-        indirect_node_index = inode_buffer->pointers[i];
-        if (indirect_node_index == 0) {
+        indirect_node_index = (inode_buffer->pointers[i] - 1);
+        if (indirect_node_index == -1) {
             indirect_node_index = get_free_indirect_node_index();
             if (indirect_node_index < 0) {
                 pprintf("No free indirect node is available [fill_free_blocks]");
@@ -257,7 +262,8 @@ int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
 
             set_indirect_node_bitmap_value(indirect_node_index, 1);
 
-            inode_buffer->pointers[i] = indirect_node_index;
+            // +1 because 0 signifies empty
+            inode_buffer->pointers[i] = (indirect_node_index + 1);
             
             if (write_inode(fd, inode_buffer, inode_index) == -1) {
                 pprintf("Unable to write to inode [fill_free_blocks]");
@@ -354,8 +360,14 @@ int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer,
     indirect_node temp_indirect_node;
 
     for (i = NO_OF_DIRECT_INDEXES; i < (NO_OF_INDIRECT_INDEXES); i++) {
-        indirect_node_index = inode_buffer->pointers[i];
-    
+        // -1 to get actual indirect node index
+        indirect_node_index = (inode_buffer->pointers[i] - 1);
+
+        if (indirect_node_index == -1) {
+            pprintf("Invalid indirect node index [fill_used_block_with_partition]");
+            continue;
+        }
+
         if (read_indirect_node(fd, &temp_indirect_node, indirect_node_index) == -1) {
             pprintf("Unable to read indirect node [fill_used_block_with_partition]");
             return -1;
