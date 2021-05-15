@@ -184,6 +184,40 @@ int clean_dentry(int * fd, int dentry_index) {
     return 1;
 }
 
+int djb2_hash(char * string) {
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *string++) {
+        hash = ((hash << 5) + hash) + c;
+    }
+
+    return (hash % (TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)));
+}
+
+int dentry_lookup(int * fd, char * nod_name, int inode_index) {
+    if (nod_name == NULL) {
+        pprintf("Invalid parameters provided [dentry_lookup]");
+        return -1;
+    }
+
+    dentry temp;
+    int dentry_index = djb2_hash(nod_name);
+    int tries = 0;
+
+    do {
+        if (read_dentry(fd, &temp, dentry_index) == -1) {
+            pprintf("Unable to read dentry [dentry_lookup]");
+            return -1;
+        }
+
+        tries++;
+        dentry_index++; // move the dentry_index forward, look ahead in case of collision
+    } while ((tries < TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)) && (strcmp(temp.filename, nod_name) != 0 && inode_index != (temp.inode_index)));
+
+    return temp.inode_index;
+}
+
 /**
  * @brief Dumps a dump_dentry's data to stdout
  * 

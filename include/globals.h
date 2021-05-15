@@ -113,6 +113,8 @@ int initialize_dentry_blocks(int *);
 int write_dentry(int *, dentry *, int);
 int read_dentry(int *, dentry *, int);
 int clean_dentry(int *, int);
+int djb2_hash(char *);
+int dentry_lookup(int *, char *, int);
 void dump_dentry(dentry *);
 
 /* lib/data_blocks.c */

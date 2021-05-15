@@ -314,11 +314,24 @@ int init_dev(const char * path, int * fd) {
  */
 void close_dev(int * fd) {
     if (fd == NULL || *fd == -1) {
-        pprintf("Invalid parameters provided [init_dev]");
+        pprintf("Invalid parameters provided [close_dev]");
         return;
     }
 
     close(*fd);
 
     return;
+}
+
+int mkdir(int * fd, char * dir_path) {
+    if (fd == NULL || *fd == -1 || dir_path == NULL) {
+        pprintf("Invalid parameters provided [mkdir]");
+        return;
+    }
+
+    char * dir;
+
+    while ((dir = strsep(&dir_path, "/")) != NULL) {
+        
+    }
 }
