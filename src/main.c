@@ -28,52 +28,52 @@ int main () {
     init_dev("/home/shaheer/OS_Filesystem/temp/foo.img", &fd);
 
     inode temp_inode;
-    if (read_inode(&fd, &temp_inode, 0) != -1) {
-        dump_inode(&temp_inode);
-    }
+    // if (read_inode(&fd, &temp_inode, 0) != -1) {
+    //     dump_inode(&temp_inode);
+    // }
     
     indirect_node temp_indirect_node;
-    if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
-        dump_indirect_node(&temp_indirect_node);
-        if (add_pointer_to_indirect_node(&fd, 0, 0, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 1) != -1) {
-            if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
-                dump_indirect_node(&temp_indirect_node);
-            }
-        }
+    // if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
+    //     dump_indirect_node(&temp_indirect_node);
+    //     if (add_pointer_to_indirect_node(&fd, 0, 0, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 1) != -1) {
+    //         if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
+    //             dump_indirect_node(&temp_indirect_node);
+    //         }
+    //     }
 
-        if (add_pointer_to_indirect_node(&fd, 0, 9, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 8) != -1) {
-            if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
-                dump_indirect_node(&temp_indirect_node);
-            }
-        }
+    //     if (add_pointer_to_indirect_node(&fd, 0, 9, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 8) != -1) {
+    //         if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
+    //             dump_indirect_node(&temp_indirect_node);
+    //         }
+    //     }
 
-        if (remove_pointer_from_indirect_node(&fd, 0, 0) != -1) {
-            if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
-                dump_indirect_node(&temp_indirect_node);
-            }
-        }
-    }
+    //     if (remove_pointer_from_indirect_node(&fd, 0, 0) != -1) {
+    //         if (read_indirect_node(&fd, &temp_indirect_node, 0) != -1) {
+    //             dump_indirect_node(&temp_indirect_node);
+    //         }
+    //     }
+    // }
 
-    if (read_indirect_node(&fd, &temp_indirect_node, 1) != -1) {
-        dump_indirect_node(&temp_indirect_node);
-    }
+    // if (read_indirect_node(&fd, &temp_indirect_node, 1) != -1) {
+    //     dump_indirect_node(&temp_indirect_node);
+    // }
 
-    if (read_indirect_node(&fd, &temp_indirect_node, 360) != -1) {
-        dump_indirect_node(&temp_indirect_node);
-    }
+    // if (read_indirect_node(&fd, &temp_indirect_node, 360) != -1) {
+    //     dump_indirect_node(&temp_indirect_node);
+    // }
 
-    dentry temp_dentry;
-    if (read_dentry(&fd, &temp_dentry, 0) != -1) {
-        dump_dentry(&temp_dentry);
-    }
+    // dentry temp_dentry;
+    // if (read_dentry(&fd, &temp_dentry, 0) != -1) {
+    //     dump_dentry(&temp_dentry);
+    // }
 
-    if (read_dentry(&fd, &temp_dentry, 226) != -1) {
-        dump_dentry(&temp_dentry);
-    }
+    // if (read_dentry(&fd, &temp_dentry, 226) != -1) {
+    //     dump_dentry(&temp_dentry);
+    // }
 
-    if (read_dentry(&fd, &temp_dentry, 184) != -1) {
-        dump_dentry(&temp_dentry);
-    }
+    // if (read_dentry(&fd, &temp_dentry, 184) != -1) {
+    //     dump_dentry(&temp_dentry);
+    // }
     
     dump_inode_bitmap();
     dump_indirect_node_bitmap();
@@ -149,7 +149,7 @@ void dump_to_file(const char * path, const char * modes, char * data, int n, int
     for (i = 0; (i < n) && (data[i] != '\0'); i++) {
         fprintf(fp, "%c", data[i]);
         if (add_space == 1) {
-            fprintf(fp, " ", data[i]);
+            fprintf(fp, " ");
         }
     }
 

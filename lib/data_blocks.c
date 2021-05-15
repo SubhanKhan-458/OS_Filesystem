@@ -350,16 +350,16 @@ int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer,
     }
 
     // let the control flow fall down to indirect nodes
-    if (partition_and_write(fd, block_buffer, buffer, inode_buffer->pointers, inode_buffer, bytes_left) == -1) {
-        pprintf("Unable to parition and write to data block [fill_used_block_with_partition] {this isn't necessarily an error!}");
-        // return -1;
+    if (partition_and_write(fd, block_buffer, buffer, inode_buffer->pointers, inode_buffer, bytes_left) == 1) {
+        return 1;
     }
-    
+
+    pprintf("Unable to partition and write to data block [fill_used_block_with_partition] {this isn't necessarily an error!}");
     
     int i, indirect_node_index;
     indirect_node temp_indirect_node;
 
-    for (i = NO_OF_DIRECT_INDEXES; i < (NO_OF_INDIRECT_INDEXES); i++) {
+    for (i = NO_OF_DIRECT_INDEXES; i < (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES); i++) {
         // -1 to get actual indirect node index
         indirect_node_index = (inode_buffer->pointers[i] - 1);
 
@@ -374,8 +374,8 @@ int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer,
         }
 
         if (partition_and_write(fd, block_buffer, buffer, temp_indirect_node.pointers, inode_buffer, bytes_left) == -1) {
-            pprintf("Unable to parition and write to indirect node [fill_used_block_with_partition] {this isn't necessarily an error!}");
-            return -1;
+            pprintf("Unable to partition and write to indirect node [fill_used_block_with_partition] {this isn't necessarily an error!}");
+            // return -1;
         }
     }
 
