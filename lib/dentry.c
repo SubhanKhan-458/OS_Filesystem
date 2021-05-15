@@ -1,3 +1,14 @@
+/**
+ * @file dentry.c
+ * @author Shaheer Ahmed (k190233@nu.edu.pk)
+ * @brief Provides methods for managing directory entry in our FS
+ * @version 0.1
+ * @date 2021-05-15
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include "../include/globals.h"
 
 // TODO: Use hash tables for inode storage/access

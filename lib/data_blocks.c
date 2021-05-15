@@ -1,20 +1,27 @@
+/**
+ * @file data_blocks.c
+ * @author Shaheer Ahmed (k190233@nu.edu.pk)
+ * @brief Provides methods for managing data blocks in our FS
+ * @version 0.1
+ * @date 2021-05-15
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include "../include/globals.h"
-
-// We know the size of the data
-// We need to divide data into chunks of BLOCK_SIZE
-// Each chunk is written depending on its size
-// If the size is less than the BLOCK_SIZE then we look for used data blocks that can accomodate the buffer data
-// If we couldn't find space in direct data blocks, we then look for it in indirect data blocks
-// If we couldnt find it in indirect data blocks, then we utilize completely empty direct blocks
-// If there aren't any empty direct blocks, we access the indirect node's blocks and look for empty ones
-
-// remember to update inodes and indirect nodes after writes
-
-// we can use the data block bitmap to denote full and half-full blocks
-// such as 1 for full, 2 for half-full, 0 for empty
 
 // remember when deleting data, to replace blocks with '\0'
 
+/**
+ * @brief Writes data of arbitrary length to the targetted inode's data blocks
+ * 
+ * @param fd File descriptor
+ * @param buffer The data buffer
+ * @param buffer_size The data buffer's size (in bytes)
+ * @param inode_index The targetted inode's index
+ * @return (int) -1 for error, 1 for ok 
+ */
 int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL || buffer_size < 0) {
         pprintf("Invalid parameters provided [write_data]");
@@ -117,6 +124,17 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
     return -1;
 }
 
+/**
+ * @brief Handles writes to blocks that were somewhat filled
+ * 
+ * We do this to completely utilize all available space, without leaving any holes
+ * 
+ * @param fd File descriptor
+ * @param buffer The data buffer
+ * @param buffer_size The data buffer's size
+ * @param inode_buffer The targetted inode
+ * @return (int) -1 for error, 1 for ok 
+ */
 int fill_used_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buffer) {
     if (fd == NULL || *fd < 0 || buffer == NULL || buffer_size < 0 || inode_buffer == NULL) {
         pprintf("Invalid parameters provided [fill_used_blocks]");
@@ -164,7 +182,16 @@ int fill_used_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
     return -1;
 }
 
-// this can write to direct and single indirect
+/**
+ * @brief Writes buffers of less than BLOCK_SIZE bytes to the data blocks
+ * 
+ * @param fd File descriptor
+ * @param block_buffer The buffer to load our used block into
+ * @param buffer The data buffer
+ * @param buffer_size The data buffer's size
+ * @param pointers An array of pointers to data blocks
+ * @return (int) -1 for error, 1 for ok 
+ */
 int write_remaining_buffer_to_block(int * fd, char * block_buffer, char * buffer, int buffer_size, int * pointers) {
     if (fd == NULL || *fd < 0 || block_buffer == NULL || buffer == NULL || buffer_size < 0 || pointers == NULL) {
         pprintf("Invalid parameters provided [write_remaining_buffer_to_block]");
@@ -217,6 +244,16 @@ int write_remaining_buffer_to_block(int * fd, char * block_buffer, char * buffer
     return -1;
 }
 
+/**
+ * @brief Writes buffers of BLOCK_SIZE bytes to completely free data blocks
+ * 
+ * @param fd File descriptor
+ * @param buffer The data buffer
+ * @param buffer_size The data buffer's size
+ * @param inode_buffer The targetted inode
+ * @param inode_index The index to the targetted inode
+ * @return (int) -1 for error, 1 for ok 
+ */
 int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buffer, int inode_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL || buffer_size < 0 || inode_buffer == NULL) {
         pprintf("Invalid parameters provided [fill_free_blocks]");
@@ -291,6 +328,16 @@ int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
     return -1;
 }
 
+/**
+ * @brief Writes the entirety of a buffer to completely free block
+ * 
+ * @param fd File descriptor
+ * @param buffer The data buffer
+ * @param buffer_size The data buffer's size
+ * @param pointers An array of pointers to data blocks
+ * @param pointer_index The index to the pointer we just wrote to
+ * @return (int) -1 for error, 1 for ok 
+ */
 int write_full_buffer_to_block(int * fd, char * buffer, int buffer_size, int * pointers, int * pointer_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL || buffer_size < 0 || pointers == NULL) {
         pprintf("Invalid parameters provided [write_full_buffer_to_block]");
@@ -343,6 +390,16 @@ int write_full_buffer_to_block(int * fd, char * buffer, int buffer_size, int * p
     return -1;
 }
 
+/**
+ * @brief Writes to already used blocks by partioning buffer to fill the used block completely
+ * 
+ * @param fd File descriptor
+ * @param block_buffer An auxiliary buffer to support approriate writes to our blocks
+ * @param buffer The data buffer
+ * @param inode_buffer The targetted inode
+ * @param bytes_left Bytes left to be written
+ * @return (int) -1 for error, 1 for ok 
+ */
 int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer, inode * inode_buffer, int * bytes_left) {
     if (fd == NULL || *fd < 0 || buffer == NULL || block_buffer == NULL || inode_buffer == NULL) {
         pprintf("Invalid parameters provided [fill_used_block_with_partition]");
@@ -383,6 +440,17 @@ int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer,
     return 1;
 }
 
+/**
+ * @brief Partitions data and writes it to the available data blocks that can hold it
+ * 
+ * @param fd File descriptor
+ * @param block_buffer An auxiliary block to support approriate writes to our blocks
+ * @param buffer The data buffer
+ * @param pointers An array of pointers to data blocks
+ * @param inode_buffer The targetted inode
+ * @param bytes_left Bytes left to be written
+ * @return (int) -1 for error, 1 for ok 
+ */
 int partition_and_write(int * fd, char * block_buffer, char * buffer, int * pointers, inode * inode_buffer, int * bytes_left) {
     if (fd == NULL || *fd < 0 || buffer == NULL || block_buffer == NULL || inode_buffer == NULL) {
         pprintf("Invalid parameters provided [partition_and_write]");
@@ -416,6 +484,15 @@ int partition_and_write(int * fd, char * block_buffer, char * buffer, int * poin
     return -1;
 }
 
+/**
+ * @brief Gets the bytes left out of a particular data block
+ * 
+ * Returns the size of the hole that we can write to
+ * 
+ * @param fd File descriptor
+ * @param data_block_index The targetted data block's index
+ * @return (int) -1 for error, 1 for ok 
+ */
 int get_remaining_byte_count(int * fd, int data_block_index) {
     if (fd == NULL || *fd < 0 ) {
         pprintf("Invalid parameters provided [get_remaining_byte_count]");

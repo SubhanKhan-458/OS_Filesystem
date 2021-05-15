@@ -1,3 +1,14 @@
+/**
+ * @file main.c
+ * @author Shaheer Ahmed (k190233@nu.edu.pk)
+ * @brief The entry point for our FS
+ * @version 0.1
+ * @date 2021-05-15
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include "../include/globals.h"
 
 void dump_to_file(const char *, const char *, char *, int, int);
@@ -114,12 +125,12 @@ int main () {
     // dump_data_block_bitmap();
 
     // temp
-    char * bl = (char *) malloc(sizeof(char) * BLOCK_SIZE);
+    // char * bl = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     
-    read_block(&fd, (void *) bl, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 14);
-    dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "w", bl, BLOCK_SIZE, 0);
+    // read_block(&fd, (void *) bl, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 14);
+    // dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "w", bl, BLOCK_SIZE, 0);
 
-    free(bl);
+    // free(bl);
 
     close_dev(&fd);
 

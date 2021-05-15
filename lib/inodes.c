@@ -1,3 +1,14 @@
+/**
+ * @file inodes.c
+ * @author Shaheer Ahmed (k190233@nu.edu.pk)
+ * @brief Provides methods for managing inodes for our FS
+ * @version 0.1
+ * @date 2021-05-15
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #include "../include/globals.h"
 
 /**

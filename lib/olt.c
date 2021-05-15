@@ -11,6 +11,12 @@
 
 #include "../include/globals.h"
 
+/**
+ * @brief Initializes all the bitmaps utilized in object location
+ * 
+ * @param fd File descriptor
+ * @return (int) -1 for error, 1 for ok
+ */
 int initialize_bitmaps(int * fd) {
     if (fd == NULL || *fd < 0) {
         pprintf("Invalid parameters provided [initialize_bitmaps]");
@@ -86,7 +92,18 @@ int initialize_bitmaps(int * fd) {
     return 1;
 }
 
-// 0 for empty, 1 for full, 2 for half-full (has some remaining space)
+/**
+ * @brief Marks data blocks, when initializing, with either 0, 1, 2 in the data block bitmap
+ * 
+ * 0 indicates that the data block is completely empty
+ * 1 indicates that the data block is completely full
+ * 2 indicates that the data block is somewhat full
+ * 
+ * @param fd File descriptor
+ * @param block_buffer A block buffer to store the targetted data block in
+ * @param data_block_index The target data block's index
+ * @return (int) -1 for error
+ */
 int mark_data_block(int * fd, char * block_buffer, int data_block_index) {
     if (fd == NULL || *fd < 0) {
         pprintf("Invalid parameters provided [mark_data_block]");
@@ -122,6 +139,11 @@ int mark_data_block(int * fd, char * block_buffer, int data_block_index) {
     return (bytes_read == BLOCK_SIZE ? 1 : 2);
 }
 
+/**
+ * @brief Fetches any free available inode index from the inode bitmap
+ * 
+ * @return (int) -1 for error
+ */
 int get_free_inode_index() {
     int i;
     for (i = 0; i < TOTAL_NO_OF_INODES(SIZEOF_INODE); i++) {
@@ -134,6 +156,13 @@ int get_free_inode_index() {
     return -1;
 }
 
+/**
+ * @brief Sets the value for the targetted inode index in the inode bitmap
+ * 
+ * @param inode_index The target inode's index
+ * @param value The value we want to set it o
+ * @return (int) -1 for error, 1 for ok
+ */
 int set_inode_bitmap_value(int inode_index, int value) {
     if (inode_index < 0 || inode_index > TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
         pprintf("Invalid inode index provided [set_inode_bitmap_value]");
@@ -143,6 +172,11 @@ int set_inode_bitmap_value(int inode_index, int value) {
     inodes_bitmap[inode_index] = value;
 }
 
+/**
+ * @brief Gets the index of any available free indirect node, from the bitmap
+ * 
+ * @return (int) -1 for error 
+ */
 int get_free_indirect_node_index() {
     int i;
     for (i = 0; i < TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE); i++) {
@@ -155,6 +189,13 @@ int get_free_indirect_node_index() {
     return -1;
 }
 
+/**
+ * @brief Sets the value for an indirect node in the indirect node bitmap
+ * 
+ * @param indirect_node_index The index of the targetted indirect node
+ * @param value The value we want to set it to
+ * @return (int) -1 for error, 1 for ok
+ */
 int set_indirect_node_bitmap_value(int indirect_node_index, int value) {
     if (indirect_node_index < 0 || indirect_node_index > TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE)) {
         pprintf("Invalid indirect node index provided [set_indirect_node_bitmap_value]");
@@ -164,6 +205,11 @@ int set_indirect_node_bitmap_value(int indirect_node_index, int value) {
     indirect_nodes_bitmap[indirect_node_index] = value;
 }
 
+/**
+ * @brief Gets the index of any free data block's available in the bitmap
+ * 
+ * @return (int) -1 for error
+ */
 int get_free_data_block_index() {
     int i;
     for (i = 0; i < TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE); i++) {
@@ -176,6 +222,12 @@ int get_free_data_block_index() {
     return -1;
 }
 
+/**
+ * @brief Gets the value of a particular data block in the data block bitmap
+ * 
+ * @param data_block_index The index of the data block we want to fetch the value for in the bitmap
+ * @return (int) -1 for error
+ */
 int get_data_block_bitmap_value(int data_block_index) {
     if (data_block_index == 0) {
         return 0;
@@ -190,6 +242,15 @@ int get_data_block_bitmap_value(int data_block_index) {
     return data_blocks_bitmap[i];
 }
 
+/**
+ * @brief Sets the value for an index of a particular data block in its bitmap
+ * 
+ * Handles all the nuances of indexing and value comparisons (i.e. 0th index represents DATA_BLOCK_INDEX_NO and so on...)
+ * 
+ * @param data_block_index The index of the data block we want to manipulate in the bitmap
+ * @param value The value we want to set it to
+ * @return (int) -1 for error, 1 for ok
+ */
 int set_data_block_bitmap_value(int data_block_index, int value) {
     int i = (data_block_index - DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
     if (i < 0 || i > TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE)) {
@@ -201,6 +262,12 @@ int set_data_block_bitmap_value(int data_block_index, int value) {
     return 1;
 }
 
+/**
+ * @brief Prints the bitmap table for inodes
+ * 
+ * 1 signifies populated inode, 0 signifies empty inode
+ * 
+ */
 void dump_inode_bitmap() {
     int i;
 
@@ -218,6 +285,12 @@ void dump_inode_bitmap() {
     return;
 }
 
+/**
+ * @brief Prints the bitmap table for indirect nodes
+ * 
+ * 1 signifies populated indirect node, 0 signifies empty indirect node
+ * 
+ */
 void dump_indirect_node_bitmap() {
     int i;
 
@@ -235,8 +308,17 @@ void dump_indirect_node_bitmap() {
     return;
 }
 
+
+/**
+ * @brief Prints the bitmap table for data blocks
+ * 
+ * 1 signifies a fully populated block, 2 signifies a somewhat populated block, 0 signifies an empty block
+ * Indexing starts from 0, but in reality it represents the block's from DATA_BLOCK_INDEX_NO
+ * 
+ * @param limit The number of blocks to print till, defaults to all data blocks
+ */
 void dump_data_block_bitmap(int * limit) {
-    int i, n = TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE);
+    int i, n = TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE), data_block_index_no = DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE);
 
     printf("--------------------------------------------\n");
     printf("DATA BLOCK BITMAP\n");
@@ -247,7 +329,7 @@ void dump_data_block_bitmap(int * limit) {
     }
 
     for (i = 0; i < *limit; i++) {
-        printf("{[%d] %d} ", i, data_blocks_bitmap[i]);
+        printf("{[%d <=> %d] %d} ", i, (data_block_index_no + i), data_blocks_bitmap[i]);
     }
 
     printf("\n");
