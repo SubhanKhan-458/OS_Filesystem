@@ -52,7 +52,7 @@ int initialize_bitmaps(int * fd) {
                             // not relative (relative => start from 0)
                             // since it is absolute, we need to subtract DATA_BLOCK_INDEX_NO
                             // to get the bitmap index for it
-                            data_blocks_bitmap[data_block_index - data_block_index_no] = mark_data_block(fd, block_buffer, data_block_index);
+                            data_blocks_bitmap[data_block_index - data_block_index_no] = mark_data_block(fd, data_block_buffer, data_block_index);
                         }
                     } else {
                         // this marks the start of indirect node indexes
@@ -72,7 +72,7 @@ int initialize_bitmaps(int * fd) {
                             for (l = 0; l < NO_OF_DIRECT_INDEXES; l++) {
                                 data_block_index = temp_indirect_node.pointers[l];
                                 if (data_block_index != 0) {
-                                    data_blocks_bitmap[data_block_index - data_block_index_no] = mark_data_block(fd, block_buffer, data_block_index);
+                                    data_blocks_bitmap[data_block_index - data_block_index_no] = mark_data_block(fd, data_block_buffer, data_block_index);
                                 }
                             }
                         }
@@ -111,6 +111,12 @@ int mark_data_block(int * fd, char * block_buffer, int data_block_index) {
 
     if (bytes_read == 0) {
         return 0;
+    }
+
+    // if last byte of our block is null-terminator
+    // we also regard that as data-block being full
+    if (block_buffer[bytes_read] == '\0' && (bytes_read + 1 == BLOCK_SIZE)) {
+        return 1;
     }
 
     return (bytes_read == BLOCK_SIZE ? 1 : 2);
@@ -162,7 +168,7 @@ int get_free_data_block_index() {
     int i;
     for (i = 0; i < TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE); i++) {
         if (data_blocks_bitmap[i] == 0) {
-            return i;
+            return (DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + i);
         }
     }
 
@@ -171,9 +177,13 @@ int get_free_data_block_index() {
 }
 
 int get_data_block_bitmap_value(int data_block_index) {
+    if (data_block_index == 0) {
+        return 0;
+    }
+
     int i = (data_block_index - DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
     if (i < 0 || i > TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE)) {
-        pprintf("Invalid data_block_index provided [get_data_block_bitmap_index]");
+        pprintf("Invalid data_block_index provided [get_data_block_bitmap_value]");
         return -1;
     }
 
@@ -183,7 +193,7 @@ int get_data_block_bitmap_value(int data_block_index) {
 int set_data_block_bitmap_value(int data_block_index, int value) {
     int i = (data_block_index - DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
     if (i < 0 || i > TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE)) {
-        pprintf("Invalid data_block_index provided [get_data_block_bitmap_index]");
+        pprintf("Invalid data_block_index provided [set_data_block_bitmap_value]");
         return -1;
     }
 

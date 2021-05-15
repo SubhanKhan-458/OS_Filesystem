@@ -9,6 +9,10 @@
                 "${workspaceFolder}/src/main.c",
                 "${workspaceFolder}/lib/blocks.c",
                 "${workspaceFolder}/lib/inodes.c",
+                "${workspaceFolder}/lib/olt.c",
+                "${workspaceFolder}/lib/data_blocks.c",
+                "${workspaceFolder}/lib/indirect_nodes.c",
+                "${workspaceFolder}/lib/dentry.c",
                 "-o",
                 "${workspaceFolder}/builds/main"
             ],

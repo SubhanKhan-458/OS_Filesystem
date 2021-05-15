@@ -121,6 +121,9 @@ int fill_used_blocks(int *, char *, int, inode *);
 int write_remaining_buffer_to_block(int *, char *, char *, int, int *);
 int fill_free_blocks(int *, char *, int, inode *, int);
 int write_full_buffer_to_block(int *, char *, int, int *, int *);
+int fill_used_block_with_partition(int *, char *, char *, inode *, int *);
+int partition_and_write(int *, char *, char *, int *, inode *, int *);
+int get_remaining_byte_count(int *, int);
 
 /* lib/olt.c */
 int initialize_bitmaps(int *);
