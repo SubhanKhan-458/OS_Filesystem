@@ -98,9 +98,7 @@ int write_inode(int *, inode *, int);
 int read_inode(int *, inode *, int);
 int clean_inode(int *, int);
 void dump_inode(inode *);
-int initialize_inode_bitmap(int *);
 int get_free_inode_index();
-void dump_inode_bitmap();
 
 /* lib/indirect_nodes.c */
 int initialize_indirect_node_blocks(int *);
@@ -110,7 +108,6 @@ int write_indirect_node(int *, indirect_node *, int);
 int read_indirect_node(int *, indirect_node *, int);
 int clean_indirect_node(int *, int);
 void dump_indirect_node(indirect_node *);
-void dump_indirect_node_bitmap();
 
 /* lib/dentry.c */
 int initialize_dentry_blocks(int *);
@@ -120,6 +117,11 @@ int clean_dentry(int *, int);
 void dump_dentry(dentry *);
 
 /* lib/data_blocks.c */
+
+/* lib/olt.c */
+int initialize_bitmaps(int *);
+void dump_inode_bitmap();
+void dump_indirect_node_bitmap();
 void dump_data_block_bitmap();
 
 #endif

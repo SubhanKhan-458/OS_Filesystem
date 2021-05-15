@@ -1,6 +1,6 @@
 #include "../include/globals.h"
 
-#include "../include/globals.h"
+// TODO: Use hash tables for inode storage/access
 
 /**
  * @brief Initializes the dentry blocks in the block device

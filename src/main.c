@@ -246,7 +246,7 @@ int init_dev(const char * path, int * fd) {
 
     // initialize bitmaps here
     // inode_bitmap initializes the rest of the bitmaps along with it
-    if (initialize_inode_bitmap(fd) == -1) {
+    if (initialize_bitmaps(fd) == -1) {
         pprintf("Unable to initialize inode bitmap [init_dev]");
         free(block_buffer);
         return -1;
