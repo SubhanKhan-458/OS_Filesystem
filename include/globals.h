@@ -116,12 +116,19 @@ int clean_dentry(int *, int);
 void dump_dentry(dentry *);
 
 /* lib/data_blocks.c */
+int write_data(int *, char *, int, int);
+int fill_used_blocks(int *, char *, int, inode *);
+int write_remaining_buffer_to_block(int *, char *, char *, int, int *);
+int fill_free_blocks(int *, char *, int, inode *, int);
+int write_full_buffer_to_block(int *, char *, int, int *, int *);
 
 /* lib/olt.c */
 int initialize_bitmaps(int *);
 int mark_data_block(int *, char *, int);
 int get_free_inode_index();
+int set_inode_bitmap_value(int, int);
 int get_free_indirect_node_index();
+int set_indirect_node_bitmap_value(int, int);
 int get_free_data_block_index();
 int get_data_block_bitmap_value(int);
 int set_data_block_bitmap_value(int, int);

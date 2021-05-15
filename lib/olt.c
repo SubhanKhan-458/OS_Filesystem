@@ -128,6 +128,15 @@ int get_free_inode_index() {
     return -1;
 }
 
+int set_inode_bitmap_value(int inode_index, int value) {
+    if (inode_index < 0 || inode_index > TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [set_inode_bitmap_value]");
+        return -1;
+    }
+
+    inodes_bitmap[inode_index] = value;
+}
+
 int get_free_indirect_node_index() {
     int i;
     for (i = 0; i < TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE); i++) {
@@ -138,6 +147,15 @@ int get_free_indirect_node_index() {
 
     pprintf("No free indirect node available [get_free_indirect_node_index]");
     return -1;
+}
+
+int set_indirect_node_bitmap_value(int indirect_node_index, int value) {
+    if (indirect_node_index < 0 || indirect_node_index > TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE)) {
+        pprintf("Invalid indirect node index provided [set_indirect_node_bitmap_value]");
+        return -1;
+    }
+
+    indirect_nodes_bitmap[indirect_node_index] = value;
 }
 
 int get_free_data_block_index() {
