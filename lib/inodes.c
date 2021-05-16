@@ -193,6 +193,16 @@ int read_inode(int * fd, inode * buffer, int inode_index) {
  * @return (int) -1 for error, 1 for ok 
  */
 int clean_inode(int * fd, int inode_index) {
+    if (fd == NULL || *fd < 0) {
+        pprintf("Invalid parameters provided [clean_inode]");
+        return -1;
+    }
+
+    if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [clean_inode]");
+        return -1;
+    }
+
     inode temp = {
         .size = 0,
         .type = IS_EMPTY_INODE,
@@ -211,7 +221,31 @@ int clean_inode(int * fd, int inode_index) {
         return -1;
     }
 
+    // cleaned inode, mark it as empty now
+    set_inode_bitmap_value(inode_index, 0);
+
     return 1;
+}
+
+int add_inode(int * fd, inode * buffer) {
+    if (fd == NULL || *fd < 0 || buffer == NULL) {
+        pprintf("Invalid parameters provided [add_inode]");
+        return -1;
+    }
+
+    int inode_index = get_free_inode_index();
+    if (inode_index == -1) {
+        return -1;
+    }
+
+    if (write_inode(fd, buffer, inode_index) == -1) {
+        return -1;
+    }
+
+    // set inode bitmap value
+    set_inode_bitmap_value(inode_index, 1);
+
+    return inode_index;
 }
 
 /**

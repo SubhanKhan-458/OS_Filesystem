@@ -131,7 +131,7 @@ int read_dentry(int * fd, dentry * buffer, int dentry_index) {
     // 0 till (TOTAL_NO_OF_INODES - 1) is equal to the TOTAL_NO_OF_INODES,
     // hence when >= is used, not just >
     if (dentry_index < 0 || dentry_index >= TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)) {
-        pprintf("Invalid inode index provided [read_dentry]");
+        pprintf("Invalid dentry index provided [read_dentry]");
         return -1;
     }
 
@@ -188,16 +188,43 @@ int djb2_hash(char * string) {
     unsigned long hash = 5381;
     int c;
 
-    while (c = *string++) {
+    while ((c = *string++)) {
         hash = ((hash << 5) + hash) + c;
     }
 
-    return (hash % (TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)));
+    return ((int) (hash % (TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY))));
 }
 
-int dentry_lookup(int * fd, char * nod_name, int inode_index) {
-    if (nod_name == NULL) {
+int dentry_lookup(int * fd, char * node_name, int nth_occurence) {
+    if (fd == NULL || fd < 0 || node_name == NULL) {
         pprintf("Invalid parameters provided [dentry_lookup]");
+        return -1;
+    }
+    
+    dentry temp;
+    int dentry_index = djb2_hash(node_name), i;
+    
+    while (i < nth_occurence) {
+        dentry_index++;
+        i++;
+    }
+
+    if (read_dentry(fd, &temp, (dentry_index % TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY))) == -1) {
+        pprintf("Unable to read dentry [dentry_lookup]");
+        return -1;
+    }
+
+    return temp.inode_index;
+}
+
+int dentry_lookup_with_index(int * fd, char * nod_name, int inode_index) {
+    if (fd == NULL || fd < 0 || nod_name == NULL) {
+        pprintf("Invalid parameters provided [dentry_lookup]");
+        return -1;
+    }
+
+    if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [dentry_lookup]");
         return -1;
     }
 
@@ -216,6 +243,59 @@ int dentry_lookup(int * fd, char * nod_name, int inode_index) {
     } while ((tries < TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)) && (strcmp(temp.filename, nod_name) != 0 && inode_index != (temp.inode_index)));
 
     return temp.inode_index;
+}
+
+int add_dentry(int * fd, char * name, int inode_index) {
+    if (fd == NULL || *fd < 0 || name == NULL) {
+        pprintf("Invalid parameters provided [add_dentry]");
+        return -1;
+    }
+
+    if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [add_dentry]");
+        return -1;
+    }
+
+    int dentry_index = djb2_hash(name);
+    int hash_result = dentry_index;
+    dentry temp;
+    int dentry_inode_index;
+
+    do {
+        if (read_dentry(fd, &temp, dentry_index) == -1) {
+            pprintf("Unable to read dentry [add_dentry]");
+            return -1;
+        }
+
+        dentry_inode_index = (temp.inode_index - 1);
+        if (dentry_inode_index == -1) {
+            strcpy(temp.filename, name);
+            temp.inode_index = (inode_index + 1);
+            
+            if (write_dentry(fd, &temp, dentry_index) == -1) {
+                pprintf("Unable to write dentry [add_dentry]");
+                return -1;
+            }
+
+            return 1;
+        }
+
+        // if dentry_index is already filled
+        dentry_index++;
+        
+        // run the loop till we do a complete 360 (reach the starting point again)
+    } while ((dentry_index % TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY) != hash_result));
+
+    return -1;
+}
+
+int get_child_dir_by_name(int * fd, char * nod_name) {
+    if (fd == NULL || fd < 0 || nod_name == NULL) {
+        pprintf("Invalid parameters provided [get_child_dir_by_name]");
+        return -1;
+    }
+
+    
 }
 
 /**

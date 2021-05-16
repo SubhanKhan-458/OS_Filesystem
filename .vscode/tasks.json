@@ -14,7 +14,8 @@
                 "${workspaceFolder}/lib/indirect_nodes.c",
                 "${workspaceFolder}/lib/dentry.c",
                 "-o",
-                "${workspaceFolder}/builds/main"
+                "${workspaceFolder}/builds/main",
+                "-lm"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

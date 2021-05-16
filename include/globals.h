@@ -40,6 +40,8 @@
 #define SIZEOF_INDIRECT_NODE sizeof(indirect_node)
 
 #define MAX_FILENAME_LENGTH 32
+#define MAX_DIR_DEPTH 10
+#define MAX_CHILD_INODE_COUNT ((int) (BLOCK_SIZE / 4))
 
 #define FS_MAGIC_NUMBER 0x534E5300
 
@@ -82,9 +84,17 @@ typedef struct indirect_node {
     int32_t pointers[NO_OF_DIRECT_INDEXES];
 } indirect_node;
 
+typedef struct file {
+    char path[(MAX_FILENAME_LENGTH * MAX_DIR_DEPTH) + MAX_FILENAME_LENGTH];
+    char name[MAX_FILENAME_LENGTH];
+    int32_t inode_index;
+} file;
+
 u_int8_t data_blocks_bitmap[TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE)];
 u_int8_t inodes_bitmap[TOTAL_NO_OF_INODES(SIZEOF_INODE)];
 u_int8_t indirect_nodes_bitmap[TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE)];
+
+file _file;
 
 /* lib/blocks.c */
 int read_block(int *, void *, int);
@@ -97,6 +107,7 @@ int initialize_inode_blocks(int *);
 int write_inode(int *, inode *, int);
 int read_inode(int *, inode *, int);
 int clean_inode(int *, int);
+int add_inode(int *, inode *);
 void dump_inode(inode *);
 
 /* lib/indirect_nodes.c */
@@ -115,6 +126,8 @@ int read_dentry(int *, dentry *, int);
 int clean_dentry(int *, int);
 int djb2_hash(char *);
 int dentry_lookup(int *, char *, int);
+int dentry_lookup_with_index(int *, char *, int);
+int add_dentry(int *, char *, int);
 void dump_dentry(dentry *);
 
 /* lib/data_blocks.c */
@@ -126,6 +139,7 @@ int write_full_buffer_to_block(int *, char *, int, int *, int *);
 int fill_used_block_with_partition(int *, char *, char *, inode *, int *);
 int partition_and_write(int *, char *, char *, int *, inode *, int *);
 int get_remaining_byte_count(int *, int);
+int read_data_by_block(int *, char *, inode *, int);
 
 /* lib/olt.c */
 int initialize_bitmaps(int *);
