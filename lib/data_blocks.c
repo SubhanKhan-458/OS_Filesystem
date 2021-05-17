@@ -550,18 +550,31 @@ int read_data_by_block(int * fd, char * block_buffer, inode * inode_buffer, int 
         return -1;
     }
 
+    int data_block_index = 0;
+
     if (pointer >= NO_OF_DIRECT_INDEXES) {
-        indirect_node temp;
+        indirect_node indirect_node_buff;
         float calc_buff = pointer - NO_OF_DIRECT_INDEXES;
         int pointer_to_indirect_node = calc_buff / NO_OF_DIRECT_INDEXES;
-        int indirect_node_index = inode_buffer->pointers[NO_OF_DIRECT_INDEXES + pointer_to_indirect_node];
+        int indirect_node_index = inode_buffer->pointers[NO_OF_DIRECT_INDEXES + pointer_to_indirect_node] - 1;
 
-        if (read_indirect_node(fd, &temp, indirect_node_index) == -1) {
+        if (indirect_node_index == -1) {
+            pprintf("Invalid indirect node index [read_data_by_block]");
+            return -1;
+        }
+
+        if (read_indirect_node(fd, &indirect_node_buff, indirect_node_index) == -1) {
             pprintf("Unable to read indirect node [read_data_by_block]");
             return -1;
         }
 
-        if (read_block(fd, (void *) block_buffer, (temp.pointers[pointer % (NO_OF_DIRECT_INDEXES)])) == -1) {
+        data_block_index = indirect_node_buff.pointers[pointer % (NO_OF_DIRECT_INDEXES)];
+        if (data_block_index == 0) {
+            pprintf("Unable to read block [read_data_by_block]");
+            return -1;
+        }
+
+        if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
             pprintf("Unable to read block [read_data_by_block]");
             return -1;
         }
@@ -569,7 +582,13 @@ int read_data_by_block(int * fd, char * block_buffer, inode * inode_buffer, int 
         return 1;
     }
 
-    if (read_block(fd, (void *) block_buffer, (inode_buffer->pointers[pointer])) == -1) {
+    data_block_index = inode_buffer->pointers[pointer];
+    if (data_block_index == 0) {
+        pprintf("Unable to read block [read_data_by_block]");
+        return -1;
+    }
+
+    if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
         pprintf("Unable to read block [read_data_by_block]");
         return -1;
     }

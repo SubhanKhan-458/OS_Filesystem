@@ -135,7 +135,7 @@ int read_dentry(int * fd, dentry * buffer, int dentry_index) {
         return -1;
     }
 
-    int block_no = (int) (dentry_index / NO_OF_DENTRY_PER_BLOCK(SIZEOF_DENTRY));
+    int block_no = ((int) (dentry_index / NO_OF_DENTRY_PER_BLOCK(SIZEOF_DENTRY)));
     int dentry_blocks_index = DENTRY_BLOCKS_INDEX_NO;
     if ((block_no + dentry_blocks_index) < 0 || (block_no + dentry_blocks_index) > TOTAL_NO_OF_BLOCKS) {
         pprintf("Invalid block no calculated [read_dentry]");
@@ -217,6 +217,35 @@ int dentry_lookup(int * fd, char * node_name, int nth_occurence) {
     return temp.inode_index;
 }
 
+int dentry_lookup_using_inode_index(int * fd, int inode_index) {
+    if (fd == NULL || *fd < 0) {
+        pprintf("Invalid parameters provided [dentry_lookup_using_inode_index]");
+        return -1;
+    }
+
+    if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [dentry_lookup_using_inode_index]");
+        return -1;
+    }
+
+    int i, max_dentry = TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY);
+    dentry dentry_buff;
+
+    for (i = 0; i < max_dentry; i++) {
+        if (read_dentry(fd, &dentry_buff, i) == -1) {
+            continue;
+        }
+
+        if ((dentry_buff.inode_index - 1) != inode_index) {
+            continue;
+        }
+
+        return i;
+    }
+
+    return -1;
+}
+
 int dentry_lookup_with_index(int * fd, char * nod_name, int inode_index) {
     if (fd == NULL || fd < 0 || nod_name == NULL) {
         pprintf("Invalid parameters provided [dentry_lookup]");
@@ -245,8 +274,8 @@ int dentry_lookup_with_index(int * fd, char * nod_name, int inode_index) {
     return temp.inode_index;
 }
 
-int add_dentry(int * fd, char * name, int inode_index) {
-    if (fd == NULL || *fd < 0 || name == NULL) {
+int add_dentry(int * fd, char * inode_name, int inode_name_len, int inode_index) {
+    if (fd == NULL || *fd < 0 || inode_name == NULL) {
         pprintf("Invalid parameters provided [add_dentry]");
         return -1;
     }
@@ -256,23 +285,33 @@ int add_dentry(int * fd, char * name, int inode_index) {
         return -1;
     }
 
-    int dentry_index = djb2_hash(name);
+    char * inode_name_buff = (char *) malloc(sizeof(char) * inode_name_len + 1);
+    if (inode_name_buff == NULL) {
+        // unable to alloc mem
+        return -1;
+    }
+
+    // +1 to add space for null-terminator and memset to fill all bytes with null-terminator
+    memset(inode_name_buff, '\0', sizeof(char) * inode_name_len + 1);
+    memcpy(inode_name_buff, inode_name, inode_name_len);
+
+    int dentry_index = djb2_hash(inode_name);
     int hash_result = dentry_index;
-    dentry temp;
+    dentry dentry_buff;
     int dentry_inode_index;
 
     do {
-        if (read_dentry(fd, &temp, dentry_index) == -1) {
+        if (read_dentry(fd, &dentry_buff, dentry_index) == -1) {
             pprintf("Unable to read dentry [add_dentry]");
             return -1;
         }
 
-        dentry_inode_index = (temp.inode_index - 1);
+        dentry_inode_index = (dentry_buff.inode_index - 1);
         if (dentry_inode_index == -1) {
-            strncpy(temp.filename, name, sizeof(char) * strlen(name));
-            temp.inode_index = (inode_index + 1);
+            memcpy(dentry_buff.filename, inode_name_buff, sizeof(char) * inode_name_len + 1); //, (sizeof(char) * strlen(name)));
+            dentry_buff.inode_index = (inode_index + 1);
             
-            if (write_dentry(fd, &temp, dentry_index) == -1) {
+            if (write_dentry(fd, &dentry_buff, dentry_index) == -1) {
                 pprintf("Unable to write dentry [add_dentry]");
                 return -1;
             }
@@ -287,15 +326,6 @@ int add_dentry(int * fd, char * name, int inode_index) {
     } while (((dentry_index % TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)) != hash_result));
 
     return -1;
-}
-
-int get_child_dir_by_name(int * fd, char * nod_name) {
-    if (fd == NULL || fd < 0 || nod_name == NULL) {
-        pprintf("Invalid parameters provided [get_child_dir_by_name]");
-        return -1;
-    }
-
-    
 }
 
 /**

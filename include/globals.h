@@ -127,7 +127,8 @@ int clean_dentry(int *, int);
 int djb2_hash(char *);
 int dentry_lookup(int *, char *, int);
 int dentry_lookup_with_index(int *, char *, int);
-int add_dentry(int *, char *, int);
+int dentry_lookup_using_inode_index(int *, int);
+int add_dentry(int *, char *, int, int);
 void dump_dentry(dentry *);
 
 /* lib/data_blocks.c */
