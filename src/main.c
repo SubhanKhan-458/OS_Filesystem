@@ -15,6 +15,21 @@ void dump_to_file(const char *, const char *, char *, int, int, int);
 int init_dev(const char *, int *);
 void close_dev(int *);
 
+int snsfs_mknod(int *, char *, int);
+int snsfs_cd(int *, char *);
+int snsfs_mkdir(int *, char *);
+
+char * strsep_(char ** stringp, const char * delim) {
+    char *rv = *stringp;
+    if (rv) {
+        *stringp += strcspn(*stringp, delim);
+        if (**stringp)
+            *(*stringp)++ = '\0';
+        else
+            *stringp = 0; }
+    return rv;
+}
+
 int main () {
     int fd;
 
@@ -86,60 +101,68 @@ int main () {
     //     dump_dentry(&temp_dentry);
     // }
     
-    dump_inode_bitmap();
-    dump_indirect_node_bitmap();
+    // dump_inode_bitmap();
+    // dump_indirect_node_bitmap();
 
-    int lim = 50;
-    dump_data_block_bitmap(&lim);
+    // int lim = 50;
+    // dump_data_block_bitmap(&lim);
 
-    // 4096 BYTES
-    char * MSG1 = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a est. Phasellus magna. In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Cur";
-    // 4200 BYTES
-    char * MSG2 = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a est. Phasellus magna. In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Curabitur a felis in nunc fringilla tristique. Morbi mattis ullamcorper velit. Phasellus gravida semper nis";
-    // 3992 BYTES
-    char * MSG3 = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a.";
+    // // 4096 BYTES
+    // char * MSG1 = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a est. Phasellus magna. In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Cur";
+    // // 4200 BYTES
+    // char * MSG2 = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a est. Phasellus magna. In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Curabitur a felis in nunc fringilla tristique. Morbi mattis ullamcorper velit. Phasellus gravida semper nis";
+    // // 3992 BYTES
+    // char * MSG3 = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a.";
 
-    if (inodes_bitmap[1] == 0) {
-        clean_inode(&fd, 1);
-        read_inode(&fd, &temp_inode, 1);
-        temp_inode.size = 4096;
-        temp_inode.created_at = time(NULL);
-        temp_inode.type = IS_FILE_INODE;
-        write_inode(&fd, &temp_inode, 1);
-        set_inode_bitmap_value(1, 1);
-    }
+    // if (inodes_bitmap[1] == 0) {
+    //     clean_inode(&fd, 1);
+    //     read_inode(&fd, &temp_inode, 1);
+    //     temp_inode.size = 4096;
+    //     temp_inode.created_at = time(NULL);
+    //     temp_inode.type = IS_FILE_INODE;
+    //     write_inode(&fd, &temp_inode, 1);
+    //     set_inode_bitmap_value(1, 1);
+    // }
 
-    // TODO: Fix not properly cascading indirect blocks with additional data
-    write_data(&fd, MSG1, 4096, 1);
-    write_data(&fd, MSG2, 4200, 1);
-    write_data(&fd, MSG3, 3992, 1);
+    // // TODO: Fix not properly cascading indirect blocks with additional data
+    // write_data(&fd, MSG1, 4096, 1);
+    // write_data(&fd, MSG2, 4200, 1);
+    // write_data(&fd, MSG3, 3992, 1);
 
-    read_indirect_node(&fd, &temp_indirect_node, 0);
-    dump_indirect_node(&temp_indirect_node);
+    // read_indirect_node(&fd, &temp_indirect_node, 0);
+    // dump_indirect_node(&temp_indirect_node);
 
-    read_indirect_node(&fd, &temp_indirect_node, 1);
-    dump_indirect_node(&temp_indirect_node);
+    // read_indirect_node(&fd, &temp_indirect_node, 1);
+    // dump_indirect_node(&temp_indirect_node);
 
-    dump_data_block_bitmap(&lim);
+    // dump_data_block_bitmap(&lim);
 
-    // dump_data_block_bitmap();
+    // // dump_data_block_bitmap();
 
-    // temp
-    char * bl = (char *) malloc(sizeof(char) * BLOCK_SIZE);
+    // // temp
+    // char * bl = (char *) malloc(sizeof(char) * BLOCK_SIZE);
 
-    read_inode(&fd, &temp_inode, 1);
+    // read_inode(&fd, &temp_inode, 1);
 
-    int i;    
-    for (i = 0; i < (NO_OF_DIRECT_INDEXES + (NO_OF_DIRECT_INDEXES * NO_OF_INDIRECT_INDEXES)); i++) {
-        read_data_by_block(&fd, bl, &temp_inode, i);
-        if (i == 0) dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "w", bl, BLOCK_SIZE, 0, 1);
-        else dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "a", bl, BLOCK_SIZE, 0, 1);
-    }
+    // int i;    
+    // for (i = 0; i < (NO_OF_DIRECT_INDEXES + (NO_OF_DIRECT_INDEXES * NO_OF_INDIRECT_INDEXES)); i++) {
+    //     read_data_by_block(&fd, bl, &temp_inode, i);
+    //     if (i == 0) dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "w", bl, BLOCK_SIZE, 0, 1);
+    //     else dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "a", bl, BLOCK_SIZE, 0, 1);
+    // }
 
     // read_block(&fd, (void *) bl, DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) + 14);
     // dump_to_file("/home/shaheer/OS_Filesystem/temp/.dump", "w", bl, BLOCK_SIZE, 0);
 
     // free(bl);
+
+    if (snsfs_mkdir(&fd, "/aaaa/bbbb") == -1) {
+        pprintf("MKDIR FAILED");
+    }
+
+    if (snsfs_cd(&fd, "/aaaa/bbbb") == -1) {
+        pprintf("CD FAILED");
+    }
 
     close_dev(&fd);
 
@@ -388,10 +411,69 @@ int load_inodes_indexes_to_array(char * block_buffer, int32_t * inodes_in_dir, i
 
     *inode_index_count = 0;
 
-    while (strncmp(block_buffer, "\0\0\0\0", sizeof(char) * 4) != 0) {
-        memcpy(inodes_in_dir[(*inode_index_count)++], block_buffer + ((*inode_index_count) * sizeof(char) * 4), sizeof(char) * 4);
+    int offset = ((*inode_index_count) * sizeof(char) * 4);
+    while (strncmp(block_buffer + offset, "\0\0\0\0", sizeof(char) * 4) != 0 && (*inode_index_count < MAX_CHILD_INODE_COUNT)) {
+        memcpy((inodes_in_dir + (*inode_index_count)), block_buffer + offset, sizeof(char) * 4);
+        (*inode_index_count)++;
+        offset = ((*inode_index_count) * sizeof(char) * 4);
     }
 
+    return 1;
+}
+
+int add_inode_to_dir(int * fd, inode * parent_inode, int parent_inode_index, int inode_index) {
+    if (fd == NULL || *fd < 0 || parent_inode == NULL) {
+        return -1;
+    }
+
+    if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [add_inode_to_dir]");
+        return -1;
+    }
+
+    char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
+    if (block_buffer == NULL) {
+        return -1;
+    }
+
+    // fill block with '\0'
+    memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+
+    int data_block_index = parent_inode->pointers[0];
+    // if parent inode has no children, then create an empty data block
+    if (data_block_index == 0) {
+        if (write_data(fd, block_buffer, sizeof(char) * BLOCK_SIZE, parent_inode_index) == -1) {
+            free(block_buffer);
+            return -1;
+        }
+
+        data_block_index = parent_inode->pointers[0];
+    }
+
+    if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
+        free(block_buffer);
+        return -1;
+    }
+
+    int32_t inode_children[MAX_CHILD_INODE_COUNT];
+    int child_count = 0;
+
+    if (load_inodes_indexes_to_array(block_buffer, inode_children, &child_count) == -1) {
+        free(block_buffer);
+        return -1;
+    }
+
+    inode_children[child_count] = ((int32_t) inode_index);
+
+    // add to block_buffer
+    memcpy(block_buffer + (child_count * sizeof(char) * 4), &inode_index, sizeof(char) * 4);
+
+    if (write_block(fd, (void *) block_buffer, data_block_index) == -1) {
+        free(block_buffer);
+        return -1;
+    }
+
+    free(block_buffer);
     return 1;
 }
 
@@ -406,8 +488,18 @@ int snsfs_mknod(int * fd, char * name, int type) {
         return -1;
     }
 
-    inode temp;
-    temp.type = type;
+    inode temp = {
+        .created_at = ((u_int32_t) time(NULL)),
+        .uid = 0,
+        .gid = 0,
+        .last_accessed = 0,
+        .last_changed = 0,
+        .size = 0,
+    };
+
+    temp.type = ((u_int32_t) type);
+
+    memset(temp.pointers, 0, (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES) * sizeof(int32_t));
 
     int inode_index = add_inode(fd, &temp);
     if (inode_index == -1) {
@@ -444,8 +536,21 @@ int snsfs_cd(int * fd, char * dir_path) {
         return -1;
     }
 
+    // if the root inode has no children
+    if (temp.pointers[0] == 0) {
+        memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+        if (write_data(fd, block_buffer, sizeof(char) * BLOCK_SIZE, 0) == -1) {
+            free(block_buffer);
+            return -1;
+        }
+
+        pprintf("Root inode has no children [snsfs_cd]");
+        free(block_buffer);
+        return -1;
+    }
+
     // read first data block of root node
-    if (read_block(fd, &temp, temp.pointers[0]) == -1) {
+    if (read_block(fd, (void *) block_buffer, temp.pointers[0]) == -1) {
         free(block_buffer);
         return -1;
     }
@@ -463,9 +568,12 @@ int snsfs_cd(int * fd, char * dir_path) {
     int inode_index, i, j;
     int inode_found;
 
-    while ((node_name = strsep(&dir_path, "/")) != NULL) {
+    char * aux_dir_path = (char *) malloc(sizeof(char) * strlen(dir_path));
+    strncpy(aux_dir_path, dir_path, (sizeof(char) * strlen(dir_path)));
+
+    while ((node_name = strsep_(&aux_dir_path, "/")) != NULL) {
         // skip root
-        if (strcmp(node_name, "/") == 0) {
+        if (strcmp(node_name, "") == 0) {
             continue;
         }
 
@@ -494,8 +602,28 @@ int snsfs_cd(int * fd, char * dir_path) {
                         return -1;
                     }
 
+                    // if the parent inode has no children
+                    if (temp.pointers[0] == 0) {
+                        memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+                        if (write_data(fd, block_buffer, sizeof(char) * BLOCK_SIZE, inode_index) == -1) {
+                            free(block_buffer);
+                            return -1;
+                        }
+
+                        pprintf("Parent inode has no children [snsfs_cd]");
+                        free(block_buffer);
+                        return -1;
+                    }
+
                     // read first data block of target inode
-                    if (read_block(fd, &temp, temp.pointers[0]) == -1) {
+                    if (read_block(fd, (void *) block_buffer, temp.pointers[0]) == -1) {
+                        free(block_buffer);
+                        return -1;
+                    }
+
+                    // load parent's children for next iteration
+                    inode_count = 0;
+                    if (load_inodes_indexes_to_array(block_buffer, inodes_in_dir, &inode_count) == -1) {
                         free(block_buffer);
                         return -1;
                     }
@@ -514,12 +642,16 @@ int snsfs_cd(int * fd, char * dir_path) {
             free(block_buffer);
             return -1;
         }
+
+        strcpy(_file.name, node_name);
     }
 
     strcpy(_file.path, dir_path);
-    strcpy(_file.name, node_name);
 
     printf("[SUCCESS] the current directory is {%s}\n", _file.path);
+
+    // free(aux_dir_path); // might be a mem leak
+    free(block_buffer);
 
     return 1;
 }
@@ -537,7 +669,7 @@ int snsfs_mkdir(int * fd, char * dir_path) {
         return -1;
     }
 
-    inode temp;
+    inode temp, temp_inode_for_type;
 
     // load root's inodes
     if (read_inode(fd, &temp, 0) == -1) {
@@ -545,8 +677,23 @@ int snsfs_mkdir(int * fd, char * dir_path) {
         return -1;
     }
 
+    // if the root has no children
+    if (temp.pointers[0] == 0) {
+        memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+        if (write_data(fd, block_buffer, sizeof(char) * BLOCK_SIZE, 0) == -1) {
+            free(block_buffer);
+            return -1;
+        }
+
+        // re-read to update the inode
+        if (read_inode(fd, &temp, 0) == -1) {
+            free(block_buffer);
+            return -1;
+        }
+    }
+
     // read first data block of root node
-    if (read_block(fd, &temp, temp.pointers[0]) == -1) {
+    if (read_block(fd, (void *) block_buffer, temp.pointers[0]) == -1) {
         free(block_buffer);
         return -1;
     }
@@ -561,18 +708,23 @@ int snsfs_mkdir(int * fd, char * dir_path) {
     }
 
     char * node_name;
-    int dir_inode_index = 0, inode_index, i, j;
+    int parent_inode_index = 0, inode_index, i, j;
     int inode_found;
+    int directory_created = 0; // flag signifies if a dir was created during this process
 
-    while ((node_name = strsep(&dir_path, "/")) != NULL) {
+    char * aux_dir_path = (char *) malloc(sizeof(char) * strlen(dir_path));
+    strncpy(aux_dir_path, dir_path, (sizeof(char) * strlen(dir_path)));
+
+    while ((node_name = strsep_(&aux_dir_path, "/")) != NULL) {
         // skip root
-        if (strcmp(node_name, "/") == 0) {
+        if (strcmp(node_name, "") == 0) {
             continue;
         }
 
         // max number of childs reached
         if (inode_count >= MAX_CHILD_INODE_COUNT) {
             free(block_buffer);
+            free(aux_dir_path);
             return -1;
         }
 
@@ -587,32 +739,116 @@ int snsfs_mkdir(int * fd, char * dir_path) {
                 inode_index = snsfs_mknod(fd, node_name, IS_DIR_INODE);
                 if (inode_index == -1) {
                     free(block_buffer);
+                    free(aux_dir_path);
                     return -1;
                 }
 
                 // created dir
-                if (add_inode_to_dir(fd, dir_inode_index, inode_index) == -1) {
+                // temp is parent
+                if (add_inode_to_dir(fd, &temp, parent_inode_index, inode_index) == -1) {
                     free(block_buffer);
+                    free(aux_dir_path);
                     return -1;
                 }
+
+                // make this the parent in the next iteration
+                parent_inode_index = inode_index;
+                if (read_inode(fd, &temp, parent_inode_index) == -1) {
+                    free(block_buffer);
+                    free(aux_dir_path);
+                    return -1;
+                }
+
+                // if the parent inode has no children
+                if (temp.pointers[0] == 0) {
+                    memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+                    if (write_data(fd, block_buffer, sizeof(char) * BLOCK_SIZE, parent_inode_index) == -1) {
+                        free(block_buffer);
+                        free(aux_dir_path);
+                        return -1;
+                    }
+
+                    // re-read to update the inode
+                    if (read_inode(fd, &temp, parent_inode_index) == -1) {
+                        free(block_buffer);
+                        free(aux_dir_path);
+                        return -1;
+                    }
+                }
+
+                // read the first data block of the parent node
+                if (read_block(fd, (void *) block_buffer, temp.pointers[0]) == -1) {
+                    free(block_buffer);
+                    free(aux_dir_path);
+                    return -1;
+                }
+
+                // load all the children of this inode to our array
+                inode_count = 0;
+                if (load_inodes_indexes_to_array(block_buffer, inodes_in_dir, &inode_count) == -1) {
+                    free(block_buffer);
+                    free(aux_dir_path);
+                    return -1;
+                }
+
+                // a directory was created during this process
+                directory_created = 1;
+
+                // skip the rest and move to next iteration
+                continue;
             }
 
+            // directory might exist in the parent, check for it
             for (i = 0; i < inode_count; i++) {
+                // if child is in the parent
                 if (inodes_in_dir[i] == inode_index) {
-                    // load target inode's child inodes
-                    if (read_inode(fd, &temp, inode_index) == -1) {
+                    // load the found inode to check its type
+                    if (read_inode(fd, &temp_inode_for_type, inode_index) == -1) {
                         free(block_buffer);
+                        free(aux_dir_path);
                         return -1;
                     }
 
+                    // the inode found wasn't a directory
                     if (temp.type != IS_DIR_INODE) {
+                        inode_found = 0;
+                        break; // break out of this loop and look further
+                    }
+
+                    // inode was found and is a directory
+                    // make our child inode the parent inode now
+                    memcpy(&temp, &temp_inode_for_type, SIZEOF_INODE);
+                    parent_inode_index = inode_index;
+
+                    // if the parent inode has no children
+                    if (temp.pointers[0] == 0) {
+                        memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+                        if (write_data(fd, block_buffer, sizeof(char) * BLOCK_SIZE, parent_inode_index) == -1) {
+                            free(block_buffer);
+                            free(aux_dir_path);
+                            return -1;
+                        }
+
+                        // re-read to update the inode
+                        if (read_inode(fd, &temp, parent_inode_index) == -1) {
+                            free(block_buffer);
+                            free(aux_dir_path);
+                            return -1;
+                        }
+                    }
+                    
+                    // read the first data block of the new parent inode
+                    if (read_block(fd, (void *) block_buffer, temp.pointers[0]) == -1) {
                         free(block_buffer);
+                        free(aux_dir_path);
                         return -1;
                     }
 
-                    // read first data block of target inode
-                    if (read_block(fd, &temp, temp.pointers[0]) == -1) {
+                    // load all the children of this inode to our array
+                    inode_count = 0;
+                    if (load_inodes_indexes_to_array(block_buffer, inodes_in_dir, &inode_count) == -1) {
                         free(block_buffer);
+                        free(aux_dir_path);
                         return -1;
                     }
 
@@ -627,15 +863,75 @@ int snsfs_mkdir(int * fd, char * dir_path) {
         }
 
         if (inode_found == 0) {
-            free(block_buffer);
-            return -1;
+            inode_index = snsfs_mknod(fd, node_name, IS_DIR_INODE);
+            if (inode_index == -1) {
+                free(block_buffer);
+                free(aux_dir_path);
+                return -1;
+            }
+
+            // created dir
+            // temp is parent
+            if (add_inode_to_dir(fd, &temp, parent_inode_index, inode_index) == -1) {
+                free(block_buffer);
+                free(aux_dir_path);
+                return -1;
+            }
+
+            // make this the parent in the next iteration
+            parent_inode_index = inode_index;
+            if (read_inode(fd, &temp, parent_inode_index) == -1) {
+                free(block_buffer);
+                free(aux_dir_path);
+                return -1;
+            }
+
+            // if the parent inode has no children
+            if (temp.pointers[0] == 0) {
+                memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+                if (write_data(fd, block_buffer, sizeof(char) * BLOCK_SIZE, parent_inode_index) == -1) {
+                    free(block_buffer);
+                    free(aux_dir_path);
+                    return -1;
+                }
+
+                // re-read to update the inode
+                if (read_inode(fd, &temp, parent_inode_index) == -1) {
+                    free(block_buffer);
+                    free(aux_dir_path);
+                    return -1;
+                }
+            }
+
+            // read the first data block of the parent node
+            if (read_block(fd, (void *) block_buffer, temp.pointers[0]) == -1) {
+                free(block_buffer);
+                free(aux_dir_path);
+                return -1;
+            }
+
+            // load all the children of this inode to our array
+            inode_count = 0;
+            if (load_inodes_indexes_to_array(block_buffer, inodes_in_dir, &inode_count) == -1) {
+                free(block_buffer);
+                free(aux_dir_path);
+                return -1;
+            }
+
+            // a directory was created during this process
+            directory_created = 1;
+
+            // skip the rest and move to next iteration
+            continue;
         }
     }
 
-    strcpy(_file.path, dir_path);
-    strcpy(_file.name, node_name);
+    if (directory_created == 1) {
+        printf("[SUCCESS] directory created {%s}\n", dir_path);
+    }
 
-    printf("[SUCCESS] the current directory is {%s}\n", _file.path);
+    free(block_buffer);
+    free(aux_dir_path);
 
     return 1;
 }

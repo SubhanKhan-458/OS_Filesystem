@@ -202,7 +202,7 @@ int dentry_lookup(int * fd, char * node_name, int nth_occurence) {
     }
     
     dentry temp;
-    int dentry_index = djb2_hash(node_name), i;
+    int dentry_index = djb2_hash(node_name), i = 0;
     
     while (i < nth_occurence) {
         dentry_index++;
@@ -269,7 +269,7 @@ int add_dentry(int * fd, char * name, int inode_index) {
 
         dentry_inode_index = (temp.inode_index - 1);
         if (dentry_inode_index == -1) {
-            strcpy(temp.filename, name);
+            strncpy(temp.filename, name, sizeof(char) * strlen(name));
             temp.inode_index = (inode_index + 1);
             
             if (write_dentry(fd, &temp, dentry_index) == -1) {
@@ -284,7 +284,7 @@ int add_dentry(int * fd, char * name, int inode_index) {
         dentry_index++;
         
         // run the loop till we do a complete 360 (reach the starting point again)
-    } while ((dentry_index % TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY) != hash_result));
+    } while (((dentry_index % TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)) != hash_result));
 
     return -1;
 }
