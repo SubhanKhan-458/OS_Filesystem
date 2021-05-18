@@ -117,6 +117,19 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
     }
 
     if (bytes_left == 0) {
+        // update inode's size
+        inode inode_buff;
+        if (read_inode(fd, &inode_buff, inode_index) == -1) {
+            pprintf("Unable to read inode [write_data]");
+            return -1;
+        }
+
+        inode_buff.size += buffer_size;
+        if (write_inode(fd, &inode_buff, inode_index) == -1) {
+            pprintf("Unable to write inode [write_data]");
+            return -1;
+        }
+
         return 1;
     }
 

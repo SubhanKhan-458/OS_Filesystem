@@ -21,13 +21,13 @@ int snsfs_mkdir(int *, char *);
 int snsfs_touch(int *, char *);
 int snsfs_cat(int *, char *, char *, int);
 int snsfs_ls(int *, char *);
-
-// left
 int snsfs_head(int *, char *);
 int snsfs_tail(int *, char *);
+
+// left
 int snsfs_mv(int *, char *, char *);
 int snsfs_rm(int *, char *);
-int snsfs_cp(int *, char *);
+int snsfs_cp(int *, char *, char *);
 
 int main () {
     int fd;
@@ -168,9 +168,9 @@ int main () {
     //     }
     // }
 
-    if (snsfs_mkdir(&fd, "/home/games") == -1) {
-        pprintf("MKDIR FAILED");
-    }
+    // if (snsfs_mkdir(&fd, "/home/games") == -1) {
+    //     pprintf("MKDIR FAILED");
+    // }
 
     // if (snsfs_cd(&fd, "/home/games") == -1) {
     //     pprintf("CD FAILED");
@@ -186,23 +186,46 @@ int main () {
     // printf("\nuser@ubuntu:%s\n", _file.path);
     // printf("currently opened file: %s\n", _file.name);
 
-    if (snsfs_touch(&fd, "/home/noman.txt") == -1) {
-        pprintf("TOUCH FAILED");
-    }
+    // if (snsfs_touch(&fd, "/home/noman.txt") == -1) {
+    //     pprintf("TOUCH FAILED");
+    // }
 
-    if (snsfs_touch(&fd, "/home/games/noman.txt") == -1) {
-        pprintf("TOUCH FAILED");
-    }
+    // if (snsfs_touch(&fd, "/home/games/noman.txt") == -1) {
+    //     pprintf("TOUCH FAILED");
+    // }
 
-
-    // char * data = NULL; // "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a est. Phasellus magna. In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Cur";
-    // int data_size = 0; // BLOCK_SIZE;
-    // if (snsfs_cat(&fd, "/home/games/a.txt", data, data_size) == -1) {
+    char * data = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a est. Phasellus magna. In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Cur";
+    int data_size = BLOCK_SIZE;
+    // if (snsfs_cat(&fd, "/home/noman.txt", data, data_size) == -1) {
     //     pprintf("CAT FAILED");
     // }
 
-    snsfs_touch(&fd, "/shaheer.txt");
-    snsfs_mkdir(&fd, "/games");
+    // snsfs_touch(&fd, "/shaheer.txt");
+    // snsfs_mkdir(&fd, "/games");
+
+    if (snsfs_ls(&fd, "/home/games") == -1) {
+        pprintf("LS FAILED");
+    }
+
+    if (snsfs_ls(&fd, "/") == -1) {
+        pprintf("LS FAILED");
+    }
+
+    // if (snsfs_head(&fd, "/home/noman.txt") == -1) {
+    //     pprintf("HEAD FAILED");
+    // }
+
+    // if (snsfs_tail(&fd, "/home/noman.txt") == -1) {
+    //     pprintf("TAIL FAILED");
+    // }
+
+    if (snsfs_mv(&fd, "/home/games/shaheer.txt", "/") == -1) {
+        pprintf("MV FAILED");
+    }
+
+    if (snsfs_ls(&fd, "/home/games") == -1) {
+        pprintf("LS FAILED");
+    }
 
     if (snsfs_ls(&fd, "/") == -1) {
         pprintf("LS FAILED");
@@ -534,6 +557,113 @@ int add_inode_to_dir(int * fd, inode * parent_inode, int parent_inode_index, int
     return 1;
 }
 
+int left_shift_at_target(int32_t * child_inodes, int * child_inode_count, int inode_index) {
+    if (child_inodes == NULL || child_inode_count == NULL || *child_inode_count <= 0 || *child_inode_count >= MAX_CHILD_INODE_COUNT) {
+        return -1;
+    }
+
+    if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [left_shift_at_target]");
+        return -1;
+    }
+
+    int i, shift_flag = 0;
+
+    for (i = 0; i < *child_inode_count; i++) {        
+        if (shift_flag == 1) {
+            child_inodes[i - 1] = child_inodes[i];
+        }
+
+        if (child_inodes[i] == inode_index) {
+            shift_flag = 1;
+        }
+    }
+
+    (*child_inode_count)--;
+
+    return 1;
+}
+
+int rem_inode_from_dir(int * fd, inode * parent_inode, int parent_inode_index, int inode_index) {
+    if (fd == NULL || *fd < 0 || parent_inode == NULL) {
+        return -1;
+    }
+
+    if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [rem_inode_from_dir]");
+        return -1;
+    }
+
+    char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
+    if (block_buffer == NULL) {
+        return -1;
+    }
+
+    // fill block with '\0'
+    memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+
+    int data_block_index = parent_inode->pointers[0];
+    // if parent inode has no children, then just exit, since nothing to remove
+    if (data_block_index == 0) {
+        free(block_buffer);
+        return -1;
+    }
+
+    if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
+        free(block_buffer);
+        return -1;
+    }
+
+    int32_t inode_children[MAX_CHILD_INODE_COUNT];
+    int child_count = 0;
+
+    if (load_inodes_indexes_to_array(block_buffer, inode_children, &child_count) == -1) {
+        free(block_buffer);
+        return -1;
+    }
+
+    // no child inodes
+    if (child_count == 0) {
+        free(block_buffer);
+        return -1;
+    }
+
+    if (left_shift_at_target(inode_children, &child_count, inode_index) == -1) {
+        free(block_buffer);
+        return -1;
+    }
+
+    memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+
+    // no need to copy if only one child
+    if (child_count != 0) {
+        // rem from block_buffer
+        // child count has already been reduced when left shifting
+        // idk if this would work or not
+        memcpy(block_buffer, inode_children, (child_count * sizeof(int32_t)));
+    }
+
+    // increment node size
+    parent_inode->size -= 4;
+    // if data block has become empty
+    if (child_count == 0) {
+        parent_inode->pointers[0] = 0;
+    }
+
+    if (write_inode(fd, parent_inode, parent_inode_index) == -1) {
+        free(block_buffer);
+        return -1;
+    }
+
+    if (write_block(fd, (void *) block_buffer, data_block_index) == -1) {
+        free(block_buffer);
+        return -1;
+    }
+
+    free(block_buffer);
+    return 1;
+}
+
 int snsfs_mknod(int * fd, char * inode_name, int inode_name_len, int type) {
     if (fd == NULL || *fd < 1 || inode_name == NULL) {
         pprintf("Invalid parameters provided [snsfs_mknod]");
@@ -718,7 +848,6 @@ int load_child_inodes(int * fd, inode * inode_buff, int32_t * child_inodes, int 
         (*child_inodes_count)++;
     }
 
-    // idk if this works or not | TODO: REMOVE THIS AFTER TESTING
     if ((*child_inodes_count) > 0) {
         memcpy(child_inodes, block_buffer, (sizeof(int32_t) * (*child_inodes_count)));
     }
@@ -1325,4 +1454,751 @@ int snsfs_ls(int * fd, char * path) {
     }
 
     return (exhaust_strsep == 0 ? 1 : -1);
+}
+
+int snsfs_head(int * fd, char * path) {
+    if (fd == NULL || *fd == -1 || path == NULL) {
+        pprintf("Invalid parameters provided [snsfs_head]");
+        return -1;
+    }
+
+    char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
+    if (aux_path == NULL) {
+        pprintf("Unable to allocate memory [snsfs_head]");
+        return -1;
+    }
+
+    memset(aux_path, '\0', ((int) strlen(path) + 1));
+    strncpy(aux_path, path, strlen(path));
+
+    int delim_count = 1; // starting from 1, since root is compulsory
+    int i = 0;
+
+    // counts num of delimiter ('/')
+    while (aux_path[i] != '\0') {
+        if (aux_path[i] == '/') {
+            delim_count++;
+        }
+
+        i++;
+    }
+
+    // reset for use in delimiter count comparison
+    i = 0;
+
+    char * inode_name = NULL;
+    inode inode_buff;
+    int parent_inode_index = 0, child_inode_index = 0, lookup_retries = 0, child_inodes_count = 0;
+    int inode_name_len = 0, inode_type = IS_DIR_INODE;
+    int exhaust_strsep = 0, exited_by_will = 0;
+    int32_t child_inodes[MAX_CHILD_INODE_COUNT];
+    char prompt = 'y', buff_consumer;
+    int block_counter = 0, block_pointer = 0;
+    char * block_buffer = NULL;
+
+    while ((inode_name = strsep(&aux_path, "/")) != NULL) {
+        if (exhaust_strsep == 1) {
+            continue;
+        }
+
+        inode_name_len = strlen(inode_name);
+        if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
+            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_head]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // increase depth count
+        i++;
+        if (i == delim_count) {
+            inode_type = IS_FILE_INODE;
+        }
+
+        if (strcmp(inode_name, "") == 0) {
+            // inode is root
+            child_inode_index = 0;
+        } else {
+            // is not root
+            lookup_retries = 0;
+
+            if (child_inodes_count > 0) {
+                do {
+                    child_inode_index = (dentry_lookup(fd, inode_name, lookup_retries) - 1);
+                    lookup_retries++;
+                } while ((!(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type)) && (lookup_retries < child_inodes_count)));
+            }
+
+            // is_child_inode should not only act as an includes, but also check
+            // whether the child inode founded is a directory or not
+            // if not directory, then return 0
+
+            if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
+                // is not a child inode currently
+                pprintf("Invalid directory lookup [snsfs_head]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+
+        // our old child node is the new parent node
+        parent_inode_index = child_inode_index;
+        if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
+            pprintf("Unable to read inode [snsfs_head]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        if (inode_buff.type == IS_FILE_INODE) {
+            block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE + 1);
+            if (block_buffer == NULL) {
+                // failed to read
+                exhaust_strsep = 1;
+                continue;
+            }
+
+            memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+
+            if (read_data_by_block(fd, block_buffer, &inode_buff, block_counter) == -1) {
+                free(block_buffer);
+                pprintf("There was a problem while trying to read the block...");
+                exhaust_strsep = 1;
+                break;
+            }
+
+            pprintf("-----------------------------------------------------------\n");
+
+            for (block_pointer = 0; block_buffer[block_pointer] != '\0' && block_pointer < BLOCK_SIZE; block_pointer++) {
+                printf("%c", block_buffer[block_pointer]);
+            }
+
+            printf("\n\n");
+            pprintf("-----------------------------------------------------------");
+
+            exited_by_will = 1;
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // read the parent's data block, updates the child_inodes array and child_inodes_count
+        if (inode_type == IS_DIR_INODE) {
+            if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
+                pprintf("Unable to load child inodes [snsfs_head]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+    }
+
+    return (exited_by_will == 1 ? 1 : -1);
+}
+
+int snsfs_tail(int * fd, char * path) {
+    if (fd == NULL || *fd == -1 || path == NULL) {
+        pprintf("Invalid parameters provided [snsfs_tail]");
+        return -1;
+    }
+
+    char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
+    if (aux_path == NULL) {
+        pprintf("Unable to allocate memory [snsfs_tail]");
+        return -1;
+    }
+
+    memset(aux_path, '\0', ((int) strlen(path) + 1));
+    strncpy(aux_path, path, strlen(path));
+
+    int delim_count = 1; // starting from 1, since root is compulsory
+    int i = 0;
+
+    // counts num of delimiter ('/')
+    while (aux_path[i] != '\0') {
+        if (aux_path[i] == '/') {
+            delim_count++;
+        }
+
+        i++;
+    }
+
+    // reset for use in delimiter count comparison
+    i = 0;
+
+    char * inode_name = NULL;
+    inode inode_buff;
+    int parent_inode_index = 0, child_inode_index = 0, lookup_retries = 0, child_inodes_count = 0;
+    int inode_name_len = 0, inode_type = IS_DIR_INODE;
+    int exhaust_strsep = 0, exited_by_will = 0;
+    int32_t child_inodes[MAX_CHILD_INODE_COUNT];
+    char prompt = 'y', buff_consumer;
+    int block_counter = 0, block_pointer = 0;
+    char * block_buffer = NULL;
+
+    while ((inode_name = strsep(&aux_path, "/")) != NULL) {
+        if (exhaust_strsep == 1) {
+            continue;
+        }
+
+        inode_name_len = strlen(inode_name);
+        if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
+            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_tail]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // increase depth count
+        i++;
+        if (i == delim_count) {
+            inode_type = IS_FILE_INODE;
+        }
+
+        if (strcmp(inode_name, "") == 0) {
+            // inode is root
+            child_inode_index = 0;
+        } else {
+            // is not root
+            lookup_retries = 0;
+
+            if (child_inodes_count > 0) {
+                do {
+                    child_inode_index = (dentry_lookup(fd, inode_name, lookup_retries) - 1);
+                    lookup_retries++;
+                } while ((!(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type)) && (lookup_retries < child_inodes_count)));
+            }
+
+            // is_child_inode should not only act as an includes, but also check
+            // whether the child inode founded is a directory or not
+            // if not directory, then return 0
+
+            if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
+                // is not a child inode currently
+                pprintf("Invalid directory lookup [snsfs_tail]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+
+        // our old child node is the new parent node
+        parent_inode_index = child_inode_index;
+        if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
+            pprintf("Unable to read inode [snsfs_tail]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        if (inode_buff.type == IS_FILE_INODE) {
+            block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE + 1);
+            if (block_buffer == NULL) {
+                // failed to read
+                exhaust_strsep = 1;
+                continue;
+            }
+
+            memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+            block_counter = (NO_OF_DIRECT_INDEXES + (NO_OF_INDIRECT_INDEXES * NO_OF_DIRECT_INDEXES)) - 1;
+
+            while (read_data_by_block(fd, block_buffer, &inode_buff, block_counter) == -1 && block_counter >= 0) {
+                block_counter--;
+            }
+
+            if (block_counter < 0) {
+                free(block_buffer);
+                pprintf("There was a problem while trying to read the block...");
+                exhaust_strsep = 1;
+                break;
+            }
+
+            pprintf("-----------------------------------------------------------\n");
+
+            for (block_pointer = 0; block_buffer[block_pointer] != '\0' && block_pointer < BLOCK_SIZE; block_pointer++) {
+                printf("%c", block_buffer[block_pointer]);
+            }
+
+            printf("\n\n");
+            pprintf("-----------------------------------------------------------");
+
+            exited_by_will = 1;
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // read the parent's data block, updates the child_inodes array and child_inodes_count
+        if (inode_type == IS_DIR_INODE) {
+            if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
+                pprintf("Unable to load child inodes [snsfs_tail]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+    }
+
+    return (exited_by_will == 1 ? 1 : -1);
+}
+
+int snsfs_mv(int * fd, char * src, char * dest) {
+    if (fd == NULL || *fd == -1 || src == NULL || dest == NULL) {
+        pprintf("Invalid parameters provided [snsfs_mv]");
+        return -1;
+    }
+
+    char * aux_src = (char *) malloc(sizeof(char) * strlen(src) + 1); // +1 for null-terminator
+    if (aux_src == NULL) {
+        pprintf("Unable to allocate memory [snsfs_mv]");
+        return -1;
+    }
+
+    memset(aux_src, '\0', ((int) strlen(src) + 1));
+    strncpy(aux_src, src, strlen(src));
+
+    int delim_count = 1; // starting from 1, since root is compulsory
+    int i = 0;
+
+    // counts num of delimiter ('/')
+    while (aux_src[i] != '\0') {
+        if (aux_src[i] == '/') {
+            delim_count++;
+        }
+
+        i++;
+    }
+
+    // reset for use in delimiter count comparison
+    i = 0;
+
+    char * inode_name = NULL;
+    inode inode_buff, src_parent_inode_buff;
+    int parent_inode_index = 0, child_inode_index = 0, lookup_retries = 0, child_inodes_count = 0;
+    int inode_name_len = 0, inode_type = IS_DIR_INODE;
+    int exhaust_strsep = 0, exited_by_will = 0;
+    int32_t child_inodes[MAX_CHILD_INODE_COUNT];
+    int src_parent_inode_index = 0, src_child_inode_index = 0;
+
+    // src check
+
+    while ((inode_name = strsep(&aux_src, "/")) != NULL) {
+        if (exhaust_strsep == 1) {
+            continue;
+        }
+
+        inode_name_len = strlen(inode_name);
+        if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
+            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_mv]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // increase depth count
+        i++;
+        if (i == delim_count) {
+            inode_type = IS_FILE_INODE;
+        }
+
+        if (strcmp(inode_name, "") == 0) {
+            // inode is root
+            child_inode_index = 0;
+        } else {
+            // is not root
+            lookup_retries = 0;
+
+            if (child_inodes_count > 0) {
+                do {
+                    child_inode_index = (dentry_lookup(fd, inode_name, lookup_retries) - 1);
+                    lookup_retries++;
+                } while ((!(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type)) && (lookup_retries < child_inodes_count)));
+            }
+
+            // is_child_inode should not only act as an includes, but also check
+            // whether the child inode founded is a directory or not
+            // if not directory, then return 0
+
+            if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
+                // is not a child inode currently
+                pprintf("Invalid directory lookup [snsfs_mv]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+
+        // keep parent inode and child inode of target for later use
+        memcpy(&src_parent_inode_buff, &inode_buff, SIZEOF_INODE);
+        src_parent_inode_index = parent_inode_index;
+        src_child_inode_index = child_inode_index;
+
+        // our old child node is the new parent node
+        parent_inode_index = child_inode_index;
+        if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
+            pprintf("Unable to read inode [snsfs_mv]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        if (inode_buff.type == IS_FILE_INODE) {
+            exited_by_will = 1;
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // read the parent's data block, updates the child_inodes array and child_inodes_count
+        if (inode_type == IS_DIR_INODE) {
+            if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
+                pprintf("Unable to load child inodes [snsfs_mv]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+    }
+
+    if (exited_by_will == 0) {
+        // invalid file path, or last file isn't of type file
+        return -1;
+    }
+
+    inode_name = NULL;
+    parent_inode_index = 0, child_inode_index = 0, lookup_retries = 0, child_inodes_count = 0;
+    inode_name_len = 0, inode_type = IS_DIR_INODE;
+    exhaust_strsep = 0, exited_by_will = 0;
+
+    char * aux_dest = (char *) malloc(sizeof(char) * strlen(dest) + 1); // +1 for null-terminator
+    if (aux_dest == NULL) {
+        pprintf("Unable to allocate memory [snsfs_mv]");
+        return -1;
+    }
+
+    memset(aux_dest, '\0', ((int) strlen(dest) + 1));
+    strncpy(aux_dest, dest, strlen(dest));
+
+    // dest check
+    i = 0, delim_count = 1;
+
+    // counts num of delimiter ('/')
+    while (aux_dest[i] != '\0') {
+        if (aux_dest[i] == '/') {
+            delim_count++;
+        }
+
+        i++;
+    }
+
+    // reset for use in delimiter count comparison
+    i = 0;
+
+    while ((inode_name = strsep(&aux_dest, "/")) != NULL) {
+        if (exhaust_strsep == 1) {
+            continue;
+        }
+
+        inode_name_len = strlen(inode_name);
+        if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
+            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_mv]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // increase depth count
+        i++;
+
+        if (strcmp(inode_name, "") == 0) {
+            // inode is root
+            child_inode_index = 0;
+        } else {
+            // is not root
+            lookup_retries = 0;
+
+            if (child_inodes_count > 0) {
+                do {
+                    child_inode_index = (dentry_lookup(fd, inode_name, lookup_retries) - 1);
+                    lookup_retries++;
+                } while ((!(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type)) && (lookup_retries < child_inodes_count)));
+            }
+
+            // is_child_inode should not only act as an includes, but also check
+            // whether the child inode founded is a directory or not
+            // if not directory, then return 0
+
+            if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
+                // is not a child inode currently
+                pprintf("Invalid directory lookup [snsfs_mv]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+
+        // our old child node is the new parent node
+        parent_inode_index = child_inode_index;
+        if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
+            pprintf("Unable to read inode [snsfs_mv]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        if (i == delim_count) {
+            if (inode_buff.type != IS_DIR_INODE) {
+                // child inode is not a dir
+                exhaust_strsep = 1;
+                continue;
+            }
+
+            if (add_inode_to_dir(fd, &inode_buff, parent_inode_index, src_child_inode_index) == -1) {
+                // failed to add child inode to src parent
+                exhaust_strsep = 1;
+                continue;
+            }
+
+            if (rem_inode_from_dir(fd, &src_parent_inode_buff, src_parent_inode_index, src_child_inode_index) == -1) {
+                // failed to remove child inode from src parent
+                exhaust_strsep = 1;
+                continue;
+            }
+
+            exited_by_will = 1;
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // read the parent's data block, updates the child_inodes array and child_inodes_count
+        if (inode_type == IS_DIR_INODE) {
+            if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
+                pprintf("Unable to load child inodes [snsfs_mv]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+    }
+
+    return (exited_by_will == 1 ? 1 : -1);
+}
+
+int snsfs_rm(int * fd, char * path) {}
+
+int snsfs_cp(int * fd, char * src, char * dest) {
+        if (fd == NULL || *fd == -1 || src == NULL || dest == NULL) {
+        pprintf("Invalid parameters provided [snsfs_cp]");
+        return -1;
+    }
+
+    char * aux_src = (char *) malloc(sizeof(char) * strlen(src) + 1); // +1 for null-terminator
+    if (aux_src == NULL) {
+        pprintf("Unable to allocate memory [snsfs_cp]");
+        return -1;
+    }
+
+    memset(aux_src, '\0', ((int) strlen(src) + 1));
+    strncpy(aux_src, src, strlen(src));
+
+    int delim_count = 1; // starting from 1, since root is compulsory
+    int i = 0;
+
+    // counts num of delimiter ('/')
+    while (aux_src[i] != '\0') {
+        if (aux_src[i] == '/') {
+            delim_count++;
+        }
+
+        i++;
+    }
+
+    // reset for use in delimiter count comparison
+    i = 0;
+
+    char * inode_name = NULL;
+    inode inode_buff, src_parent_inode_buff;
+    int parent_inode_index = 0, child_inode_index = 0, lookup_retries = 0, child_inodes_count = 0;
+    int inode_name_len = 0, inode_type = IS_DIR_INODE;
+    int exhaust_strsep = 0, exited_by_will = 0;
+    int32_t child_inodes[MAX_CHILD_INODE_COUNT];
+    int src_parent_inode_index = 0, src_child_inode_index = 0;
+
+    // src check
+
+    while ((inode_name = strsep(&aux_src, "/")) != NULL) {
+        if (exhaust_strsep == 1) {
+            continue;
+        }
+
+        inode_name_len = strlen(inode_name);
+        if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
+            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cp]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // increase depth count
+        i++;
+        if (i == delim_count) {
+            inode_type = IS_FILE_INODE;
+        }
+
+        if (strcmp(inode_name, "") == 0) {
+            // inode is root
+            child_inode_index = 0;
+        } else {
+            // is not root
+            lookup_retries = 0;
+
+            if (child_inodes_count > 0) {
+                do {
+                    child_inode_index = (dentry_lookup(fd, inode_name, lookup_retries) - 1);
+                    lookup_retries++;
+                } while ((!(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type)) && (lookup_retries < child_inodes_count)));
+            }
+
+            // is_child_inode should not only act as an includes, but also check
+            // whether the child inode founded is a directory or not
+            // if not directory, then return 0
+
+            if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
+                // is not a child inode currently
+                pprintf("Invalid directory lookup [snsfs_cp]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+
+        // keep parent inode and child inode of target for later use
+        memcpy(&src_parent_inode_buff, &inode_buff, SIZEOF_INODE);
+        src_parent_inode_index = parent_inode_index;
+        src_child_inode_index = child_inode_index;
+
+        // our old child node is the new parent node
+        parent_inode_index = child_inode_index;
+        if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
+            pprintf("Unable to read inode [snsfs_cp]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        if (inode_buff.type == IS_FILE_INODE) {
+            exited_by_will = 1;
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // read the parent's data block, updates the child_inodes array and child_inodes_count
+        if (inode_type == IS_DIR_INODE) {
+            if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
+                pprintf("Unable to load child inodes [snsfs_cp]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+    }
+
+    if (exited_by_will == 0) {
+        // invalid file path, or last file isn't of type file
+        return -1;
+    }
+
+    inode_name = NULL;
+    parent_inode_index = 0, child_inode_index = 0, lookup_retries = 0, child_inodes_count = 0;
+    inode_name_len = 0, inode_type = IS_DIR_INODE;
+    exhaust_strsep = 0, exited_by_will = 0;
+
+    char * aux_dest = (char *) malloc(sizeof(char) * strlen(dest) + 1); // +1 for null-terminator
+    if (aux_dest == NULL) {
+        pprintf("Unable to allocate memory [snsfs_cp]");
+        return -1;
+    }
+
+    memset(aux_dest, '\0', ((int) strlen(dest) + 1));
+    strncpy(aux_dest, dest, strlen(dest));
+
+    // dest check
+    i = 0, delim_count = 1;
+
+    // counts num of delimiter ('/')
+    while (aux_dest[i] != '\0') {
+        if (aux_dest[i] == '/') {
+            delim_count++;
+        }
+
+        i++;
+    }
+
+    // reset for use in delimiter count comparison
+    i = 0;
+
+    while ((inode_name = strsep(&aux_dest, "/")) != NULL) {
+        if (exhaust_strsep == 1) {
+            continue;
+        }
+
+        inode_name_len = strlen(inode_name);
+        if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
+            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cp]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // increase depth count
+        i++;
+
+        if (strcmp(inode_name, "") == 0) {
+            // inode is root
+            child_inode_index = 0;
+        } else {
+            // is not root
+            lookup_retries = 0;
+
+            if (child_inodes_count > 0) {
+                do {
+                    child_inode_index = (dentry_lookup(fd, inode_name, lookup_retries) - 1);
+                    lookup_retries++;
+                } while ((!(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type)) && (lookup_retries < child_inodes_count)));
+            }
+
+            // is_child_inode should not only act as an includes, but also check
+            // whether the child inode founded is a directory or not
+            // if not directory, then return 0
+
+            if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
+                // is not a child inode currently
+                pprintf("Invalid directory lookup [snsfs_cp]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+
+        // our old child node is the new parent node
+        parent_inode_index = child_inode_index;
+        if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
+            pprintf("Unable to read inode [snsfs_cp]");
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        if (i == delim_count) {
+            if (inode_buff.type != IS_DIR_INODE) {
+                // child inode is not a dir
+                exhaust_strsep = 1;
+                continue;
+            }
+
+            // we'll just link the same inode
+            if (add_inode_to_dir(fd, &inode_buff, parent_inode_index, src_child_inode_index) == -1) {
+                // failed to add child inode to src parent
+                exhaust_strsep = 1;
+                continue;
+            }
+
+            // don't delete from parent
+            // if (rem_inode_from_dir(fd, &src_parent_inode_buff, src_parent_inode_index, src_child_inode_index) == -1) {
+            //     // failed to remove child inode from src parent
+            //     exhaust_strsep = 1;
+            //     continue;
+            // }
+
+            exited_by_will = 1;
+            exhaust_strsep = 1;
+            continue;
+        }
+
+        // read the parent's data block, updates the child_inodes array and child_inodes_count
+        if (inode_type == IS_DIR_INODE) {
+            if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
+                pprintf("Unable to load child inodes [snsfs_cp]");
+                exhaust_strsep = 1;
+                continue;
+            }
+        }
+    }
+
+    return (exited_by_will == 1 ? 1 : -1);
 }
