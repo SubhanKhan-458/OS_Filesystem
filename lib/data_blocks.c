@@ -608,3 +608,34 @@ int read_data_by_block(int * fd, char * block_buffer, inode * inode_buffer, int 
 
     return 1;
 }
+
+int empty_data_blocks(int * fd, int32_t * pointers) {
+    if (fd == NULL || *fd == -1 || pointers == NULL) {
+        return -1;
+    }
+
+    int i, data_block_index;
+
+    char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE + 1);
+    if (block_buffer == NULL) {
+        pprintf("Unable to allocate memory [empty_data_block]");
+        return -1;
+    }
+
+    memset(block_buffer, '\0', sizeof(char) * BLOCK_SIZE);
+
+    for (i = 0; i < NO_OF_DIRECT_INDEXES; i++) {
+        data_block_index = pointers[i];
+        if (data_block_index != 0) {
+            if (write_block(fd, (void *) block_buffer, data_block_index) == -1) {
+                free(block_buffer);
+                pprintf("Unable to write block [empty_data_block]");
+                return -1;
+            }
+
+            set_data_block_bitmap_value(data_block_index, 0);
+        }
+    }
+
+    return 1;
+}

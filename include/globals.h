@@ -108,6 +108,7 @@ int write_inode(int *, inode *, int);
 int read_inode(int *, inode *, int);
 int clean_inode(int *, int);
 int add_inode(int *, inode *);
+int empty_inode(int *, inode *, int);
 void dump_inode(inode *);
 
 /* lib/indirect_nodes.c */
@@ -141,6 +142,7 @@ int fill_used_block_with_partition(int *, char *, char *, inode *, int *);
 int partition_and_write(int *, char *, char *, int *, inode *, int *);
 int get_remaining_byte_count(int *, int);
 int read_data_by_block(int *, char *, inode *, int);
+int empty_data_blocks(int *, int32_t *);
 
 /* lib/olt.c */
 int initialize_bitmaps(int *);

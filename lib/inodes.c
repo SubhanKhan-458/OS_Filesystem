@@ -248,6 +248,50 @@ int add_inode(int * fd, inode * buffer) {
     return inode_index;
 }
 
+int empty_inode(int * fd, inode * inode_buff, int inode_index) {
+    if (fd == NULL || *fd < 0 || inode_buff == NULL) {
+        pprintf("Invalid parameters provided [empty_inode]");
+        return -1;
+    }
+
+    if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
+        pprintf("Invalid inode index provided [empty_inode]");
+        return -1;
+    }
+
+    // clean data blocks
+    if (empty_data_blocks(fd, inode_buff->pointers) == -1) {
+        return -1;
+    }
+
+    int i, indirect_node_index;
+    indirect_node indirect_node_buff;
+
+    for (i = NO_OF_DIRECT_INDEXES; i < (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES); i++) {
+        indirect_node_index = (inode_buff->pointers[i] - 1);
+        if (indirect_node_index == -1) {
+            continue;
+        }
+
+        if (read_indirect_node(fd, &indirect_node_buff, indirect_node_index) == -1) {
+            return -1;
+        }
+
+        if (empty_data_blocks(fd, indirect_node_buff.pointers) == -1) {
+            return -1;
+        }
+
+        set_indirect_node_bitmap_value(indirect_node_index, 0);
+    }
+
+    // clean inode
+    if (clean_inode(fd, inode_index) == -1) {
+        return -1;
+    }
+
+    return 1;
+}
+
 /**
  * @brief Dumps an inode's data to stdout
  * 
