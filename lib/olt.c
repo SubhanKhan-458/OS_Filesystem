@@ -1,6 +1,6 @@
 /**
  * @file olt.c [Object Location Table]
- * @author Shaheer Ahmed (k190233@nu.edu.pk)
+ * @author Shaheer Ahmed (k190233@nu.edu.pk) & Noman Vadsariya & Subhan Khan
  * @brief Provides methods for object location tables for inodes, indirect nodes etc.
  * @version 0.1
  * @date 2021-05-15

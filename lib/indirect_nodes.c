@@ -1,6 +1,6 @@
 /**
  * @file indirect_nodes.c
- * @author Shaheer Ahmed (k190233@nu.edu.pk)
+ * @author Shaheer Ahmed (k190233@nu.edu.pk) & Noman Vadsariya & Subhan Khan
  * @brief Provides methods for managing indirect nodes for our FS
  * @version 0.1
  * @date 2021-05-15

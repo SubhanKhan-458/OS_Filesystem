@@ -1,6 +1,6 @@
 /**
  * @file inodes.c
- * @author Shaheer Ahmed (k190233@nu.edu.pk)
+ * @author Shaheer Ahmed (k190233@nu.edu.pk) & Noman Vadsariya & Subhan Khan
  * @brief Provides methods for managing inodes for our FS
  * @version 0.1
  * @date 2021-05-15
