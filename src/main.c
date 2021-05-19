@@ -47,67 +47,195 @@ int main () {
     // printf("INDIRECT_NODE_BLOCKS_INDEX_NO = %d\n", INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY));
     // printf("DATA_BLOCKS_INDEX_NO = %d\n", DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
 
-
+    pprintf("\nRegistering FS...");
+    pprintf("Opening Device...");
     init_dev("/home/shaheer/OS_Filesystem/temp/foo.img", &fd);
 
-    if (snsfs_mkdir(&fd, "/noman") == -1) {
-        pprintf("MKDIR FAILED [-2]");
+    int inputlen = 200;
+    char * inputstr = NULL;
+    char * arg;
+    int exhaust_strsep = 0, exited_by_will = 0, exit_snsfs = 0, i = 0;
+    int opt = 0;
+    int delim_count = 0;
+    char * second_arg_buff = NULL;
+
+    /**
+     * opt = 0 => cd
+     * opt = 1 => mkdir
+     * opt = 2 => touch
+     * opt = 3 => cat
+     * opt = 4 => head
+     * opt = 5 => tail
+     * opt = 6 => mv
+     * opt = 7 => cp
+     * opt = 8 => rm
+     * opt = 9 => ls
+     */
+
+    pprintf("\n-----------------------------------------------------\n");
+    pprintf("[SNS_FS] MENU");
+    pprintf("\n-----------------------------------------------------\n");
+
+    pprintf("Input a command operation and arguments separated by a space, i.e. 'mkdir /newfolder', 'touch /newfolder/newfile.txt'\n");
+    pprintf("Supported commands include: cd, mknod, mkdir, touch, cat, head, tail, mv, cp, rm, ls\n");
+
+    while (exit_snsfs == 0) {
+        if (inputstr == NULL) {
+            inputstr = (char *) malloc(sizeof(char) * inputlen);
+        }
+
+        fgets(inputstr, 120, stdin);
+        inputstr[strlen(inputstr) - 1] = '\0';
+
+        i = 0, delim_count = 1;
+        while (i < 120 && inputstr[i] != '\0') {
+            if (inputstr[i] == ' ') {
+                delim_count++;
+            }
+
+            i++;
+        }
+
+        i = 0;
+        opt = 0;
+        exhaust_strsep = 0;
+        exit_snsfs = 0;
+        exited_by_will = 0;
+
+        while ((arg = strsep(&inputstr, " ")) != NULL) {
+            if (exhaust_strsep == 1) {
+                continue;
+            }
+
+            if (i == 0) {
+                if (strcmp(arg, "cd") == 0) {
+                    opt = 0;
+                } else if (strcmp(arg, "mkdir") == 0) {
+                    opt = 1;
+                } else if (strcmp(arg, "touch") == 0) {
+                    opt = 2;
+                } else if (strcmp(arg, "cat") == 0) {
+                    opt = 3;
+                } else if (strcmp(arg, "head") == 0) {
+                    opt = 4;
+                } else if (strcmp(arg, "tail") == 0) {
+                    opt = 5;
+                } else if (strcmp(arg, "mv") == 0) {
+                    opt = 6;
+                } else if (strcmp(arg, "cp") == 0) {
+                    opt = 7;
+                } else if (strcmp(arg, "rm") == 0) {
+                    opt = 8;
+                } else if (strcmp(arg, "ls") == 0) {
+                    opt = 9;
+                } else {
+                    exhaust_strsep = 1;
+                    exit_snsfs = 1;
+                }
+            } else if (i == 1) {
+                if (opt == 0) {
+                    if (snsfs_cd(&fd, arg) == -1) {
+                        pprintf("[ERROR] cd failed");
+                    }
+
+                    exhaust_strsep = 1;
+                } else if (opt == 1) {
+                    if (snsfs_mkdir(&fd, arg) == -1) {
+                        pprintf("[ERROR] mkdir failed");
+                    }
+
+                    exhaust_strsep = 1;
+                } else if (opt == 2) {
+                    if (snsfs_touch(&fd, arg) == -1) {
+                        pprintf("[ERROR] touch failed");
+                    }
+
+                    exhaust_strsep = 1;
+                } else if (opt == 3) {
+                    if ((i + 1) == delim_count) {
+                        if (snsfs_cat(&fd, arg, NULL, 0) == -1) {
+                            pprintf("[ERROR] cat failed");
+                        }
+
+                        exhaust_strsep = 1;
+                    } else {
+                        if (second_arg_buff == NULL) {
+                            second_arg_buff = (char *) malloc(sizeof(char) * 120);
+                            memset(second_arg_buff, '\0', 120);
+                        }
+
+                        strcpy(second_arg_buff, arg);
+                    }
+                } else if (opt == 4) {
+                    if (snsfs_head(&fd, arg) == -1) {
+                        pprintf("[ERROR] head failed");
+                    }
+
+                    exhaust_strsep = 1;
+                } else if (opt == 5) {
+                    if (snsfs_tail(&fd, arg) == -1) {
+                        pprintf("[ERROR] tail failed");
+                    }
+
+                    exhaust_strsep = 1;
+                } else if (opt == 6 || opt == 7) {
+                    if (second_arg_buff == NULL) {
+                        second_arg_buff = (char *) malloc(sizeof(char) * 120);
+                        memset(second_arg_buff, '\0', 120);
+                    }
+
+                    strcpy(second_arg_buff, arg);
+                } else if (opt == 8) {
+                    if (snsfs_rm(&fd, arg) == -1) {
+                        pprintf("[ERROR] rm failed");
+                    }
+
+                    exhaust_strsep = 1;
+                } else if (opt == 9) {
+                    if (snsfs_ls(&fd, arg) == -1) {
+                        pprintf("[ERROR] ls failed");
+                    }
+
+                    exhaust_strsep = 1;
+                } else {
+                    exhaust_strsep = 1;
+                }
+            } else if (i == 2) {
+                if (opt == 3) {
+                    if (snsfs_cat(&fd, second_arg_buff, arg, strlen(arg) + 1) == -1) {
+                        pprintf("[ERROR] cat failed");
+                    }
+
+                    if (second_arg_buff != NULL) {
+                        free(second_arg_buff);
+                    }
+                } else if (opt == 6) {
+                    if (snsfs_mv(&fd, second_arg_buff, arg) == -1) {
+                        pprintf("[ERROR] mv failed");
+                    }
+
+                    if (second_arg_buff != NULL) {
+                        free(second_arg_buff);
+                    }
+                } else if (opt == 7) {
+                    if (snsfs_cp(&fd, second_arg_buff, arg) == -1) {
+                        pprintf("[ERROR] cp failed");
+                    }
+
+                    if (second_arg_buff != NULL) {
+                        free(second_arg_buff);
+                    }
+                }
+
+                exhaust_strsep = 1;
+            }
+
+            i++;
+        }
     }
 
-    if (snsfs_mkdir(&fd, "/subhan") == -1) {
-        pprintf("MKDIR FAILED [-1]");
-    }
-
-    if (snsfs_touch(&fd, "/noman/noman.txt") == -1) {
-        pprintf("TOUCH FAILED [-1]");
-    }
-
-    if (snsfs_ls(&fd, "/") == -1) {
-        pprintf("LS FAILED [1]");
-    }    
-
-    if (snsfs_ls(&fd, "/subhan") == -1) {
-        pprintf("LS FAILED [2]");
-    }
-
-    if (snsfs_ls(&fd, "/noman") == -1) {
-        pprintf("LS FAILED [3]");
-    }
-
-    if (snsfs_rm(&fd, "/noman/noman.txt") == -1) {
-        pprintf("RM FAILED [1]");
-    }
-
-    if (snsfs_touch(&fd, "/noman.txt") == -1) {
-        pprintf("TOUCH FAILED [1]");
-    }
-
-    char * data = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien. Vestibulum purus quam, scelerisque ut, mollis sed, nonummy id, metus. Nullam accumsan lorem in dui. Cras ultricies mi eu turpis hendrerit fringilla. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; In ac dui quis mi consectetuer lacinia. Nam pretium turpis et arcu. Duis arcu tortor, suscipit eget, imperdiet nec, imperdiet iaculis, ipsum. Sed aliquam ultrices mauris. Integer ante arcu, accumsan a, consectetuer eget, posuere ut, mauris. Praesent adipiscing. Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut eros et nisl sagittis vestibulum. Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Sed lectus. Donec mollis hendrerit risus. Phasellus nec sem in justo pellentesque facilisis. Etiam imperdiet imperdiet orci. Nunc nec neque. Phasellus leo dolor, tempus non, auctor et, hendrerit quis, nisi. Curabitur ligula sapien, tincidunt non, euismod vitae, posuere imperdiet, leo. Maecenas malesuada. Praesent congue erat at massa. Sed cursus turpis vitae tortor. Donec posuere vulputate arcu. Phasellus accumsan cursus velit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Sed aliquam, nisi quis porttitor congue, elit erat euismod orci, ac placerat dolor lectus quis orci. Phasellus consectetuer vestibulum elit. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. Vestibulum fringilla pede sit amet augue. In turpis. Pellentesque posuere. Praesent turpis. Aenean posuere, tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus. Donec elit libero, sodales nec, volutpat a, suscipit non, turpis. Nullam sagittis. Suspendisse pulvinar, augue ac venenatis condimentum, sem libero volutpat nibh, nec pellentesque velit pede quis nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Fusce id purus. Ut varius tincidunt libero. Phasellus dolor. Maecenas vestibulum mollis diam. Pellentesque ut neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. In dui magna, posuere eget, vestibulum et, tempor auctor, justo. In ac felis quis tortor malesuada pretium. Pellentesque auctor neque nec urna. Proin sapien ipsum, porta a, auctor quis, euismod ut, mi. Aenean viverra rhoncus pede. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Ut non enim eleifend felis pretium feugiat. Vivamus quis mi. Phasellus a est. Phasellus magna. In hac habitasse platea dictumst. Curabitur at lacus ac velit ornare lobortis. Cur";
-    int data_size = 4096;
-
-    if (snsfs_cat(&fd, "/noman.txt", data, data_size) == -1) {
-        pprintf("CAT FAILED [1]");
-    }
-
-    if (snsfs_cat(&fd, "/noman.txt", NULL, 0) == -1) {
-        pprintf("CAT FAILED [2]");
-    }
-
-    if (snsfs_cp(&fd, "/noman.txt", "/subhan") == -1) {
-        pprintf("CP FAILED [1]");
-    }
-
-    if (snsfs_ls(&fd, "/") == -1) {
-        pprintf("LS FAILED [4]");
-    }    
-
-    if (snsfs_ls(&fd, "/subhan") == -1) {
-        pprintf("LS FAILED [5]");
-    }
-
-    if (snsfs_ls(&fd, "/noman") == -1) {
-        pprintf("LS FAILED [6]");
-    }
+    pprintf("\nDeregistering FS...");
+    pprintf("Closing Device...");
 
     close_dev(&fd);
 
@@ -130,7 +258,7 @@ void dump_to_file(const char * path, const char * modes, char * data, int n, int
     int i;
 
     if (fp == NULL) {
-        pprintf("Unable to open file for dumping... [dump_to_file]");
+        if (DEBUG == 1) pprintf("Unable to open file for dumping... [dump_to_file]");
         return;
     }
 
@@ -164,13 +292,13 @@ void dump_to_file(const char * path, const char * modes, char * data, int n, int
  */
 int init_dev(const char * path, int * fd) {
     if (path == NULL || fd == NULL) {
-        pprintf("Invalid parameters provided [init_dev]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [init_dev]");
         return -1;
     }
 
     *fd = open(path, O_CREAT | O_RDWR, S_IRWXU);
     if (*fd == -1) {
-        pprintf("Unable to open file [init_dev]");
+        if (DEBUG == 1) pprintf("Unable to open file [init_dev]");
         perror("open");
         return -1;
     }
@@ -181,13 +309,13 @@ int init_dev(const char * path, int * fd) {
     // else initialize everything from scratch
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [init_dev]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [init_dev]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, 0) == -1) {
-        pprintf("Unable to read_block [init_dev]");
+        if (DEBUG == 1) pprintf("Unable to read_block [init_dev]");
         free(block_buffer);
         return -1;
     }
@@ -203,7 +331,7 @@ int init_dev(const char * path, int * fd) {
 
         // clean all the blocks first
         if (clean_all_blocks(fd) == -1) {
-            pprintf("Unable to clean all blocks [init_dev]");
+            if (DEBUG == 1) pprintf("Unable to clean all blocks [init_dev]");
             free(block_buffer);
             return -1;
         }
@@ -217,14 +345,14 @@ int init_dev(const char * path, int * fd) {
 
         // write super block
         if (write_block(fd, (void *) block_buffer, SUPER_BLOCK_INDEX_NO) == -1) {
-            pprintf("Unable to write super block [init_dev]");
+            if (DEBUG == 1) pprintf("Unable to write super block [init_dev]");
             free(block_buffer);
             return -1;
         }
 
         // write dentry blocks
         if (initialize_dentry_blocks(fd) == -1) {
-            pprintf("Unable to write dentry blocks [init_dev]");
+            if (DEBUG == 1) pprintf("Unable to write dentry blocks [init_dev]");
             free(block_buffer);
             return -1;
         }
@@ -236,14 +364,14 @@ int init_dev(const char * path, int * fd) {
         };
 
         if (write_dentry(fd, &sb_dentry, 0) == -1) {
-            pprintf("Unable to write dentry [init_dev]");
+            if (DEBUG == 1) pprintf("Unable to write dentry [init_dev]");
             free(block_buffer);
             return -1;
         }
 
         // write inode blocks
         if (initialize_inode_blocks(fd) == -1) {
-            pprintf("Unable to write inode blocks [init_dev]");
+            if (DEBUG == 1) pprintf("Unable to write inode blocks [init_dev]");
             free(block_buffer);
             return -1;
         }
@@ -263,14 +391,14 @@ int init_dev(const char * path, int * fd) {
 
         memset(sb_inode.pointers, 0, (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES));
         if (write_inode(fd, &sb_inode, 0) == -1) {
-            pprintf("Unable to write inode [init_dev]");
+            if (DEBUG == 1) pprintf("Unable to write inode [init_dev]");
             free(block_buffer);
             return -1;
         }
 
         // write indirect node blocks
         if (initialize_indirect_node_blocks(fd) == -1) {
-            pprintf("Unable to write indirect node blocks [init_dev]");
+            if (DEBUG == 1) pprintf("Unable to write indirect node blocks [init_dev]");
             free(block_buffer);
             return -1;
         }
@@ -279,7 +407,7 @@ int init_dev(const char * path, int * fd) {
     // initialize bitmaps here
     // inode_bitmap initializes the rest of the bitmaps along with it
     if (initialize_bitmaps(fd) == -1) {
-        pprintf("Unable to initialize inode bitmap [init_dev]");
+        if (DEBUG == 1) pprintf("Unable to initialize inode bitmap [init_dev]");
         free(block_buffer);
         return -1;
     }
@@ -296,7 +424,7 @@ int init_dev(const char * path, int * fd) {
  */
 void close_dev(int * fd) {
     if (fd == NULL || *fd == -1) {
-        pprintf("Invalid parameters provided [close_dev]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [close_dev]");
         return;
     }
 
@@ -307,7 +435,7 @@ void close_dev(int * fd) {
 
 int get_tokens(char * str, char * delim, char * tokens_buffer[], int * dir_depth) {
     if (str == NULL || delim == NULL) {
-        pprintf("Invalid parameters provided [get_token]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [get_token]");
         return -1;
     }
 
@@ -328,7 +456,7 @@ int alloc_delimited_path(char * delimited_path[]) {
     for (i = 0; i < MAX_DIR_DEPTH; i++) {
         delimited_path[i] = (char *) malloc(sizeof(char) * MAX_FILENAME_LENGTH);
         if (delimited_path[i] == NULL) {
-            pprintf("Unable to allocate memory [alloc_delimited_path]");
+            if (DEBUG == 1) pprintf("Unable to allocate memory [alloc_delimited_path]");
             return -1;
         }
     }
@@ -350,7 +478,7 @@ void dealloc_delimited_path(char * delimited_path[]) {
 
 int load_inodes_indexes_to_array(char * block_buffer, int32_t * inodes_in_dir, int * inode_index_count) {
     if (block_buffer == NULL || inodes_in_dir == NULL) {
-        pprintf("Invalid parameters provided [load_inodes_indexes_to_array]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [load_inodes_indexes_to_array]");
         return -1;
     }
 
@@ -372,7 +500,7 @@ int add_inode_to_dir(int * fd, inode * parent_inode, int parent_inode_index, int
     }
 
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [add_inode_to_dir]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [add_inode_to_dir]");
         return -1;
     }
 
@@ -441,7 +569,7 @@ int left_shift_at_target(int32_t * child_inodes, int * child_inode_count, int in
     }
 
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [left_shift_at_target]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [left_shift_at_target]");
         return -1;
     }
 
@@ -468,7 +596,7 @@ int rem_inode_from_dir(int * fd, inode * parent_inode, int parent_inode_index, i
     }
 
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [rem_inode_from_dir]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [rem_inode_from_dir]");
         return -1;
     }
 
@@ -544,17 +672,17 @@ int rem_inode_from_dir(int * fd, inode * parent_inode, int parent_inode_index, i
 
 int snsfs_mknod(int * fd, char * inode_name, int inode_name_len, int type) {
     if (fd == NULL || *fd < 1 || inode_name == NULL) {
-        pprintf("Invalid parameters provided [snsfs_mknod]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_mknod]");
         return -1;
     }
 
     if (strlen(inode_name) < 0 || strlen(inode_name) > MAX_FILENAME_LENGTH) {
-        pprintf("Invalid inode name length [snsfs_mknod]");
+        if (DEBUG == 1) pprintf("Invalid inode name length [snsfs_mknod]");
         return -1;
     }
 
     if (type < IS_EMPTY_INODE || type > IS_FILE_INODE) {
-        pprintf("Invalid inode type provided [snsfs_mknod]");
+        if (DEBUG == 1) pprintf("Invalid inode type provided [snsfs_mknod]");
         return -1;
     }
 
@@ -572,12 +700,12 @@ int snsfs_mknod(int * fd, char * inode_name, int inode_name_len, int type) {
 
     int inode_index = add_inode(fd, &inode_buff);
     if (inode_index == -1) {
-        pprintf("Unable to create inode [snsfs_mknod]");
+        if (DEBUG == 1) pprintf("Unable to create inode [snsfs_mknod]");
         return -1;
     }
 
     if (add_dentry(fd, inode_name, inode_name_len, inode_index) == -1) {
-        pprintf("Unable to create dentry [snsfs_mknod]");
+        if (DEBUG == 1) pprintf("Unable to create dentry [snsfs_mknod]");
         return -1;
     }
 
@@ -586,12 +714,12 @@ int snsfs_mknod(int * fd, char * inode_name, int inode_name_len, int type) {
 
 int is_child_inode(int * fd, int child_inode_index, int * child_inodes, int child_inodes_count, int inode_type) {
     if (child_inode_index < 0 || child_inode_index > TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid child inode index provided [is_child_inode]");
+        if (DEBUG == 1) pprintf("Invalid child inode index provided [is_child_inode]");
         return 0;
     }
 
     if (fd == NULL || *fd == -1 || child_inodes == NULL || child_inodes_count <= 0) {
-        pprintf("Invalid parameters provided [is_child_inode]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [is_child_inode]");
         return 0;
     }
 
@@ -671,13 +799,13 @@ int load_child_inodes(int * fd, inode * inode_buff, int32_t * child_inodes, int 
 
 int snsfs_mkdir(int * fd, char * path) {
     if (fd == NULL || *fd == -1 || path == NULL) {
-        pprintf("Invalid parameters provided [snsfs_mkdir]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_mkdir]");
         return -1;
     }
 
     char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
     if (aux_path == NULL) {
-        pprintf("Unable to allocate memory [snsfs_mkdir]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_mkdir]");
         return -1;
     }
 
@@ -698,7 +826,7 @@ int snsfs_mkdir(int * fd, char * path) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_mkdir]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_mkdir]");
             exhaust_strsep = 1;
             continue;
         }
@@ -726,13 +854,13 @@ int snsfs_mkdir(int * fd, char * path) {
                 // make a new node, and append to the parent's child inodes
                 child_inode_index = snsfs_mknod(fd, inode_name, inode_name_len, IS_DIR_INODE);
                 if (child_inode_index == -1) {
-                    pprintf("Failed to create a child inode [snsfs_mkdir]");
+                    if (DEBUG == 1) pprintf("Failed to create a child inode [snsfs_mkdir]");
                     exhaust_strsep = 1;
                     continue;
                 }
 
                 if (add_inode_to_dir(fd, &inode_buff, parent_inode_index, child_inode_index) == -1) {
-                    pprintf("Failed to append child inode to parent [snsfs_mkdir]");
+                    if (DEBUG == 1) pprintf("Failed to append child inode to parent [snsfs_mkdir]");
                     exhaust_strsep = 1;
                     continue;
                 }
@@ -746,14 +874,14 @@ int snsfs_mkdir(int * fd, char * path) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_mkdir]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_mkdir]");
             exhaust_strsep = 1;
             continue;
         }
 
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-            pprintf("Unable to load child inodes [snsfs_mkdir]");
+            if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_mkdir]");
             exhaust_strsep = 1;
             continue;
         }
@@ -768,13 +896,13 @@ int snsfs_mkdir(int * fd, char * path) {
 
 int snsfs_cd(int * fd, char * path) {
     if (fd == NULL || *fd == -1 || path == NULL) {
-        pprintf("Invalid parameters provided [snsfs_cd]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_cd]");
         return -1;
     }
 
     char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
     if (aux_path == NULL) {
-        pprintf("Unable to allocate memory [snsfs_cd]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_cd]");
         return -1;
     }
 
@@ -796,7 +924,7 @@ int snsfs_cd(int * fd, char * path) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cd]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cd]");
             exhaust_strsep = 1;
             continue;
         }
@@ -821,7 +949,7 @@ int snsfs_cd(int * fd, char * path) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, IS_DIR_INODE))) {
                 // is not a child inode currently
-                pprintf("Failed to find child inode [snsfs_cd]");
+                if (DEBUG == 1) pprintf("Failed to find child inode [snsfs_cd]");
                 dir_exists = 0;
                 exhaust_strsep = 1;
                 continue;
@@ -844,14 +972,14 @@ int snsfs_cd(int * fd, char * path) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_cd]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_cd]");
             exhaust_strsep = 1;
             continue;
         }
 
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-            pprintf("Unable to load child inodes [snsfs_cd]");
+            if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_cd]");
             exhaust_strsep = 1;
             continue;
         }
@@ -867,13 +995,13 @@ int snsfs_cd(int * fd, char * path) {
 
 int snsfs_touch(int * fd, char * path) {
     if (fd == NULL || *fd == -1 || path == NULL) {
-        pprintf("Invalid parameters provided [snsfs_touch]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_touch]");
         return -1;
     }
 
     char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
     if (aux_path == NULL) {
-        pprintf("Unable to allocate memory [snsfs_touch]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_touch]");
         return -1;
     }
 
@@ -909,7 +1037,7 @@ int snsfs_touch(int * fd, char * path) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_touch]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_touch]");
             exhaust_strsep = 1;
             continue;
         }
@@ -942,7 +1070,7 @@ int snsfs_touch(int * fd, char * path) {
                 // is not a child inode currently
                 // if it is a directory, then just exit
                 if (inode_type == IS_DIR_INODE) {
-                    pprintf("Invalid directory lookup [snsfs_touch]");
+                    if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_touch]");
                     exhaust_strsep = 1;
                     continue;
                 }
@@ -950,13 +1078,13 @@ int snsfs_touch(int * fd, char * path) {
                 // make a new node, and append to the parent's child inodes
                 child_inode_index = snsfs_mknod(fd, inode_name, inode_name_len, IS_FILE_INODE);
                 if (child_inode_index == -1) {
-                    pprintf("Failed to create a child inode [snsfs_touch]");
+                    if (DEBUG == 1) pprintf("Failed to create a child inode [snsfs_touch]");
                     exhaust_strsep = 1;
                     continue;
                 }
 
                 if (add_inode_to_dir(fd, &inode_buff, parent_inode_index, child_inode_index) == -1) {
-                    pprintf("Failed to append child inode to parent [snsfs_touch]");
+                    if (DEBUG == 1) pprintf("Failed to append child inode to parent [snsfs_touch]");
                     exhaust_strsep = 1;
                     continue;
                 }
@@ -970,7 +1098,7 @@ int snsfs_touch(int * fd, char * path) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_touch]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_touch]");
             exhaust_strsep = 1;
             continue;
         }
@@ -978,7 +1106,7 @@ int snsfs_touch(int * fd, char * path) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_touch]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_touch]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -994,13 +1122,13 @@ int snsfs_touch(int * fd, char * path) {
 
 int snsfs_cat(int * fd, char * path, char * data, int data_size) {
     if (fd == NULL || *fd == -1 || path == NULL) {
-        pprintf("Invalid parameters provided [snsfs_cat]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_cat]");
         return -1;
     }
 
     char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
     if (aux_path == NULL) {
-        pprintf("Unable to allocate memory [snsfs_cat]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_cat]");
         return -1;
     }
 
@@ -1039,7 +1167,7 @@ int snsfs_cat(int * fd, char * path, char * data, int data_size) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cat]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cat]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1070,7 +1198,7 @@ int snsfs_cat(int * fd, char * path, char * data, int data_size) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
                 // is not a child inode currently
-                pprintf("Invalid directory lookup [snsfs_cat]");
+                if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_cat]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1079,7 +1207,7 @@ int snsfs_cat(int * fd, char * path, char * data, int data_size) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_cat]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_cat]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1088,12 +1216,12 @@ int snsfs_cat(int * fd, char * path, char * data, int data_size) {
             if (data != NULL) {
                 // we have data to write
                 if (write_data(fd, data, data_size, parent_inode_index) == -1) {
-                    pprintf("Unable to write data [snsfs_cat]");
+                    if (DEBUG == 1) pprintf("Unable to write data [snsfs_cat]");
                     exhaust_strsep = 1;
                     continue;
                 }
 
-                pprintf("Data written!");
+                if (DEBUG == 1) pprintf("Data written!");
                 exited_by_will = 1;
                 exhaust_strsep = 1;
                 continue;
@@ -1110,7 +1238,7 @@ int snsfs_cat(int * fd, char * path, char * data, int data_size) {
                 while (prompt == 'y') {
                     if (read_data_by_block(fd, block_buffer, &inode_buff, block_counter) == -1) {
                         free(block_buffer);
-                        pprintf("There was a problem while trying to read the block...");
+                        if (DEBUG == 1) pprintf("There was a problem while trying to read the block...");
                         exited_by_will = 1;
                         exhaust_strsep = 1;
                         break;
@@ -1144,7 +1272,7 @@ int snsfs_cat(int * fd, char * path, char * data, int data_size) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_cat]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_cat]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1156,13 +1284,13 @@ int snsfs_cat(int * fd, char * path, char * data, int data_size) {
 
 int snsfs_ls(int * fd, char * path) {
     if (fd == NULL || *fd == -1 || path == NULL) {
-        pprintf("Invalid parameters provided [snsfs_ls]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_ls]");
         return -1;
     }
 
     char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
     if (aux_path == NULL) {
-        pprintf("Unable to allocate memory [snsfs_ls]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_ls]");
         return -1;
     }
 
@@ -1184,7 +1312,7 @@ int snsfs_ls(int * fd, char * path) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_ls]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_ls]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1209,7 +1337,7 @@ int snsfs_ls(int * fd, char * path) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, IS_DIR_INODE))) {
                 // is not a child inode currently
-                pprintf("Failed to find child inode [snsfs_ls]");
+                if (DEBUG == 1) pprintf("Failed to find child inode [snsfs_ls]");
                 dir_exists = 0;
                 exhaust_strsep = 1;
                 continue;
@@ -1221,14 +1349,14 @@ int snsfs_ls(int * fd, char * path) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_ls]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_ls]");
             exhaust_strsep = 1;
             continue;
         }
 
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-            pprintf("Unable to load child inodes [snsfs_cd]");
+            if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_cd]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1249,13 +1377,13 @@ int snsfs_ls(int * fd, char * path) {
             }
 
             if (read_dentry(fd, &dentry_buff, dentry_index) == -1) {
-                pprintf("Unable to read dentry [snsfs_ls]");
+                if (DEBUG == 1) pprintf("Unable to read dentry [snsfs_ls]");
                 return -1;
             }
 
             if (i != -1) {
                 if (read_inode(fd, &inode_buff, child_inodes[i]) == -1) {
-                    pprintf("Unable to read child inodes [snsfs_ls]");
+                    if (DEBUG == 1) pprintf("Unable to read child inodes [snsfs_ls]");
                     return -1;
                 }
             }
@@ -1275,13 +1403,13 @@ int snsfs_ls(int * fd, char * path) {
 
 int snsfs_head(int * fd, char * path) {
     if (fd == NULL || *fd == -1 || path == NULL) {
-        pprintf("Invalid parameters provided [snsfs_head]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_head]");
         return -1;
     }
 
     char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
     if (aux_path == NULL) {
-        pprintf("Unable to allocate memory [snsfs_head]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_head]");
         return -1;
     }
 
@@ -1320,7 +1448,7 @@ int snsfs_head(int * fd, char * path) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_head]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_head]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1351,7 +1479,7 @@ int snsfs_head(int * fd, char * path) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
                 // is not a child inode currently
-                pprintf("Invalid directory lookup [snsfs_head]");
+                if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_head]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1360,7 +1488,7 @@ int snsfs_head(int * fd, char * path) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_head]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_head]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1377,7 +1505,7 @@ int snsfs_head(int * fd, char * path) {
 
             if (read_data_by_block(fd, block_buffer, &inode_buff, block_counter) == -1) {
                 free(block_buffer);
-                pprintf("There was a problem while trying to read the block...");
+                if (DEBUG == 1) pprintf("There was a problem while trying to read the block...");
                 exhaust_strsep = 1;
                 break;
             }
@@ -1399,7 +1527,7 @@ int snsfs_head(int * fd, char * path) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_head]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_head]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1411,13 +1539,13 @@ int snsfs_head(int * fd, char * path) {
 
 int snsfs_tail(int * fd, char * path) {
     if (fd == NULL || *fd == -1 || path == NULL) {
-        pprintf("Invalid parameters provided [snsfs_tail]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_tail]");
         return -1;
     }
 
     char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
     if (aux_path == NULL) {
-        pprintf("Unable to allocate memory [snsfs_tail]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_tail]");
         return -1;
     }
 
@@ -1456,7 +1584,7 @@ int snsfs_tail(int * fd, char * path) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_tail]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_tail]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1487,7 +1615,7 @@ int snsfs_tail(int * fd, char * path) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
                 // is not a child inode currently
-                pprintf("Invalid directory lookup [snsfs_tail]");
+                if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_tail]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1496,7 +1624,7 @@ int snsfs_tail(int * fd, char * path) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_tail]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_tail]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1518,7 +1646,7 @@ int snsfs_tail(int * fd, char * path) {
 
             if (block_counter < 0) {
                 free(block_buffer);
-                pprintf("There was a problem while trying to read the block...");
+                if (DEBUG == 1) pprintf("There was a problem while trying to read the block...");
                 exhaust_strsep = 1;
                 break;
             }
@@ -1540,7 +1668,7 @@ int snsfs_tail(int * fd, char * path) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_tail]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_tail]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1552,13 +1680,13 @@ int snsfs_tail(int * fd, char * path) {
 
 int snsfs_mv(int * fd, char * src, char * dest) {
     if (fd == NULL || *fd == -1 || src == NULL || dest == NULL) {
-        pprintf("Invalid parameters provided [snsfs_mv]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_mv]");
         return -1;
     }
 
     char * aux_src = (char *) malloc(sizeof(char) * strlen(src) + 1); // +1 for null-terminator
     if (aux_src == NULL) {
-        pprintf("Unable to allocate memory [snsfs_mv]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_mv]");
         return -1;
     }
 
@@ -1597,7 +1725,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_mv]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_mv]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1628,7 +1756,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
                 // is not a child inode currently
-                pprintf("Invalid directory lookup [snsfs_mv]");
+                if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_mv]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1642,7 +1770,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_mv]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_mv]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1656,7 +1784,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_mv]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_mv]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1675,7 +1803,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
 
     char * aux_dest = (char *) malloc(sizeof(char) * strlen(dest) + 1); // +1 for null-terminator
     if (aux_dest == NULL) {
-        pprintf("Unable to allocate memory [snsfs_mv]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_mv]");
         return -1;
     }
 
@@ -1704,7 +1832,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_mv]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_mv]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1732,7 +1860,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
                 // is not a child inode currently
-                pprintf("Invalid directory lookup [snsfs_mv]");
+                if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_mv]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1741,7 +1869,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_mv]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_mv]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1773,7 +1901,7 @@ int snsfs_mv(int * fd, char * src, char * dest) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_mv]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_mv]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1785,13 +1913,13 @@ int snsfs_mv(int * fd, char * src, char * dest) {
 
 int snsfs_cp(int * fd, char * src, char * dest) {
         if (fd == NULL || *fd == -1 || src == NULL || dest == NULL) {
-        pprintf("Invalid parameters provided [snsfs_cp]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_cp]");
         return -1;
     }
 
     char * aux_src = (char *) malloc(sizeof(char) * strlen(src) + 1); // +1 for null-terminator
     if (aux_src == NULL) {
-        pprintf("Unable to allocate memory [snsfs_cp]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_cp]");
         return -1;
     }
 
@@ -1830,7 +1958,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cp]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cp]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1861,7 +1989,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
                 // is not a child inode currently
-                pprintf("Invalid directory lookup [snsfs_cp]");
+                if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_cp]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1875,7 +2003,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_cp]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_cp]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1889,7 +2017,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_cp]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_cp]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1908,7 +2036,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
 
     char * aux_dest = (char *) malloc(sizeof(char) * strlen(dest) + 1); // +1 for null-terminator
     if (aux_dest == NULL) {
-        pprintf("Unable to allocate memory [snsfs_cp]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_cp]");
         return -1;
     }
 
@@ -1937,7 +2065,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cp]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_cp]");
             exhaust_strsep = 1;
             continue;
         }
@@ -1965,7 +2093,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
                 // is not a child inode currently
-                pprintf("Invalid directory lookup [snsfs_cp]");
+                if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_cp]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -1974,7 +2102,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
         // our old child node is the new parent node
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_cp]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_cp]");
             exhaust_strsep = 1;
             continue;
         }
@@ -2008,7 +2136,7 @@ int snsfs_cp(int * fd, char * src, char * dest) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_cp]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_cp]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -2020,13 +2148,13 @@ int snsfs_cp(int * fd, char * src, char * dest) {
 
 int snsfs_rm(int * fd, char * path) {
     if (fd == NULL || *fd == -1 || path == NULL) {
-        pprintf("Invalid parameters provided [snsfs_rm]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [snsfs_rm]");
         return -1;
     }
 
     char * aux_path = (char *) malloc(sizeof(char) * strlen(path) + 1); // +1 for null-terminator
     if (aux_path == NULL) {
-        pprintf("Unable to allocate memory [snsfs_rm]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [snsfs_rm]");
         return -1;
     }
 
@@ -2063,7 +2191,7 @@ int snsfs_rm(int * fd, char * path) {
 
         inode_name_len = strlen(inode_name);
         if (inode_name_len < 0 || inode_name_len > MAX_FILENAME_LENGTH) {
-            pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_rm]");
+            if (DEBUG == 1) pprintf("Provided directory name exceeds the maximum filename length (32 chars) [snsfs_rm]");
             exhaust_strsep = 1;
             continue;
         }
@@ -2094,7 +2222,7 @@ int snsfs_rm(int * fd, char * path) {
 
             if ((child_inodes_count <= 0) || !(is_child_inode(fd, child_inode_index, child_inodes, child_inodes_count, inode_type))) {
                 // is not a child inode currently
-                pprintf("Invalid directory lookup [snsfs_rm]");
+                if (DEBUG == 1) pprintf("Invalid directory lookup [snsfs_rm]");
                 exhaust_strsep = 1;
                 continue;
             }
@@ -2105,7 +2233,7 @@ int snsfs_rm(int * fd, char * path) {
         parent_inode_index_buff = parent_inode_index;
         parent_inode_index = child_inode_index;
         if (read_inode(fd, &inode_buff, parent_inode_index) == -1) {
-            pprintf("Unable to read inode [snsfs_rm]");
+            if (DEBUG == 1) pprintf("Unable to read inode [snsfs_rm]");
             exhaust_strsep = 1;
             continue;
         }
@@ -2143,7 +2271,7 @@ int snsfs_rm(int * fd, char * path) {
         // read the parent's data block, updates the child_inodes array and child_inodes_count
         if (inode_type == IS_DIR_INODE) {
             if (load_child_inodes(fd, &inode_buff, child_inodes, &child_inodes_count) == -1) {
-                pprintf("Unable to load child inodes [snsfs_rm]");
+                if (DEBUG == 1) pprintf("Unable to load child inodes [snsfs_rm]");
                 exhaust_strsep = 1;
                 continue;
             }

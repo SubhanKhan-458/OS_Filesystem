@@ -19,7 +19,7 @@
  */
 int initialize_bitmaps(int * fd) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [initialize_bitmaps]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [initialize_bitmaps]");
         return -1;
     }
 
@@ -29,7 +29,7 @@ int initialize_bitmaps(int * fd) {
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     char * data_block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL || data_block_buffer == NULL) {
-        pprintf("Unable to allocate memory [initialize_bitmaps]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [initialize_bitmaps]");
         perror("malloc");
         return -1;
     }
@@ -39,7 +39,7 @@ int initialize_bitmaps(int * fd) {
 
     for (i = INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); i < INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); i++) {
         if (read_block(fd, (void *) block_buffer, i) == -1) {
-            pprintf("Unable to read block [initialize_bitmaps]");
+            if (DEBUG == 1) pprintf("Unable to read block [initialize_bitmaps]");
             free(block_buffer);
             free(data_block_buffer);
             return -1;
@@ -69,7 +69,7 @@ int initialize_bitmaps(int * fd) {
                             indirect_nodes_bitmap[(indirect_node_index - 1)] = 1;
 
                             if (read_indirect_node(fd, &temp_indirect_node, (indirect_node_index - 1)) == -1) {
-                                pprintf("Unable to read indirect node [initialize_bitmaps]");
+                                if (DEBUG == 1) pprintf("Unable to read indirect node [initialize_bitmaps]");
                                 free(block_buffer);
                                 free(data_block_buffer);
                                 return -1;
@@ -106,19 +106,19 @@ int initialize_bitmaps(int * fd) {
  */
 int mark_data_block(int * fd, char * block_buffer, int data_block_index) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [mark_data_block]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [mark_data_block]");
         return -1;
     }
 
     int bytes_read;
 
     if (data_block_index < DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE) || data_block_index > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid data block index provided [mark_data_block]");
+        if (DEBUG == 1) pprintf("Invalid data block index provided [mark_data_block]");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
-        pprintf("Unable to read block [mark_data_block]");
+        if (DEBUG == 1) pprintf("Unable to read block [mark_data_block]");
         free(block_buffer);
         return -1;
     }
@@ -152,7 +152,7 @@ int get_free_inode_index() {
         }
     }
 
-    pprintf("No free inode available [get_free_inode_index]");
+    if (DEBUG == 1) pprintf("No free inode available [get_free_inode_index]");
     return -1;
 }
 
@@ -165,7 +165,7 @@ int get_free_inode_index() {
  */
 int set_inode_bitmap_value(int inode_index, int value) {
     if (inode_index < 0 || inode_index > TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [set_inode_bitmap_value]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [set_inode_bitmap_value]");
         return -1;
     }
 
@@ -185,7 +185,7 @@ int get_free_indirect_node_index() {
         }
     }
 
-    pprintf("No free indirect node available [get_free_indirect_node_index]");
+    if (DEBUG == 1) pprintf("No free indirect node available [get_free_indirect_node_index]");
     return -1;
 }
 
@@ -198,7 +198,7 @@ int get_free_indirect_node_index() {
  */
 int set_indirect_node_bitmap_value(int indirect_node_index, int value) {
     if (indirect_node_index < 0 || indirect_node_index > TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE)) {
-        pprintf("Invalid indirect node index provided [set_indirect_node_bitmap_value]");
+        if (DEBUG == 1) pprintf("Invalid indirect node index provided [set_indirect_node_bitmap_value]");
         return -1;
     }
 
@@ -218,7 +218,7 @@ int get_free_data_block_index() {
         }
     }
 
-    pprintf("No free data block available [get_free_data_block_index]");
+    if (DEBUG == 1) pprintf("No free data block available [get_free_data_block_index]");
     return -1;
 }
 
@@ -235,7 +235,7 @@ int get_data_block_bitmap_value(int data_block_index) {
 
     int i = (data_block_index - DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
     if (i < 0 || i > TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE)) {
-        pprintf("Invalid data_block_index provided [get_data_block_bitmap_value]");
+        if (DEBUG == 1) pprintf("Invalid data_block_index provided [get_data_block_bitmap_value]");
         return -1;
     }
 
@@ -254,7 +254,7 @@ int get_data_block_bitmap_value(int data_block_index) {
 int set_data_block_bitmap_value(int data_block_index, int value) {
     int i = (data_block_index - DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
     if (i < 0 || i > TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE)) {
-        pprintf("Invalid data_block_index provided [set_data_block_bitmap_value]");
+        if (DEBUG == 1) pprintf("Invalid data_block_index provided [set_data_block_bitmap_value]");
         return -1;
     }
 

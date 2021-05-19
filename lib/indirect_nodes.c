@@ -19,7 +19,7 @@
  */
 int initialize_indirect_node_blocks(int * fd) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [initialize_indirect_node_blocks]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [initialize_indirect_node_blocks]");
         return -1;
     }
 
@@ -30,7 +30,7 @@ int initialize_indirect_node_blocks(int * fd) {
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [initialize_indirect_node_blocks]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [initialize_indirect_node_blocks]");
         perror("malloc");
         return -1;
     }
@@ -49,7 +49,7 @@ int initialize_indirect_node_blocks(int * fd) {
     // (it is the same as total no of indirect node blocks)
     for (i = INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); i < DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE); i++) {
         if (write_block(fd, (void *) block_buffer, i) == -1) {
-            pprintf("Unable to write block [initialize_indirect_node_blocks]");
+            if (DEBUG == 1) pprintf("Unable to write block [initialize_indirect_node_blocks]");
             free(block_buffer);
             return -1;
         }
@@ -72,39 +72,39 @@ int initialize_indirect_node_blocks(int * fd) {
  */
 int add_pointer_to_indirect_node(int * fd, int indirect_node_index, int pointer_index, int data_block_index) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [add_pointer_to_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [add_pointer_to_indirect_node]");
         return -1;
     }
 
     // 0 till (TOTAL_NO_OF_INDIRECT_NODES - 1) is equal to the TOTAL_NO_OF_INDIRECT_NODES,
     // hence when >= is used, not just >
     if (indirect_node_index < 0 || indirect_node_index >= TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE)) {
-        pprintf("Invalid indirect node index provided [add_pointer_to_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid indirect node index provided [add_pointer_to_indirect_node]");
         return -1;
     }
 
     // Comparing indexes, hence >=, since (N - 1) would be the max index
     if (pointer_index < 0 || pointer_index >= (NO_OF_DIRECT_INDEXES)) {
-        pprintf("Invalid pointer index provided [add_pointer_to_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid pointer index provided [add_pointer_to_indirect_node]");
         return -1;
     }
 
     int block_no = (int) (indirect_node_index / NO_OF_INDIRECT_NODES_PER_BLOCK(SIZEOF_INDIRECT_NODE));
     int indirect_node_blocks_index = INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY);
     if ((block_no + indirect_node_blocks_index) < 0 || (block_no + indirect_node_blocks_index) > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block no calculated [add_pointer_to_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid block no calculated [add_pointer_to_indirect_node]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [add_pointer_to_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [add_pointer_to_indirect_node]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, indirect_node_blocks_index + block_no) == -1) {
-        pprintf("Unable to read block [add_pointer_to_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to read block [add_pointer_to_indirect_node]");
         free(block_buffer);
         return -1;
     }
@@ -117,7 +117,7 @@ int add_pointer_to_indirect_node(int * fd, int indirect_node_index, int pointer_
     memcpy(block_buffer + offset, &temp, SIZEOF_INDIRECT_NODE);
 
     if (write_block(fd, (void *) block_buffer, indirect_node_blocks_index + block_no) == -1) {
-        pprintf("Unable to write block [add_pointer_to_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to write block [add_pointer_to_indirect_node]");
         free(block_buffer);
         return -1;
     }
@@ -136,7 +136,7 @@ int add_pointer_to_indirect_node(int * fd, int indirect_node_index, int pointer_
  */
 int remove_pointer_from_indirect_node(int * fd, int indirect_node_index, int pointer_index) {
     if (add_pointer_to_indirect_node(fd, indirect_node_index, pointer_index, 0) == -1) {
-        pprintf("Unable to remove pointer index [remove_pointer_from_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to remove pointer index [remove_pointer_from_indirect_node]");
         return -1;
     }
 }
@@ -153,33 +153,33 @@ int remove_pointer_from_indirect_node(int * fd, int indirect_node_index, int poi
  */
 int write_indirect_node(int * fd, indirect_node * buffer, int indirect_node_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
-        pprintf("Invalid parameters provided [write_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [write_indirect_node]");
         return -1;
     }
 
     // 0 till (TOTAL_NO_OF_INDIRECT_NODES - 1) is equal to the TOTAL_NO_OF_INDIRECT_NODES,
     // hence when >= is used, not just >
     if (indirect_node_index < 0 || indirect_node_index >= TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE)) {
-        pprintf("Invalid indirect node index provided [write_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid indirect node index provided [write_indirect_node]");
         return -1;
     }
 
     int block_no = (int) (indirect_node_index / NO_OF_INDIRECT_NODES_PER_BLOCK(SIZEOF_INDIRECT_NODE));
     int indirect_node_blocks_index = INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY);
     if ((block_no + indirect_node_blocks_index) < 0 || (block_no + indirect_node_blocks_index) > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block no calculated [write_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid block no calculated [write_indirect_node]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [write_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [write_indirect_node]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, indirect_node_blocks_index + block_no) == -1) {
-        pprintf("Unable to read block [write_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to read block [write_indirect_node]");
         free(block_buffer);
         return -1;
     }
@@ -188,7 +188,7 @@ int write_indirect_node(int * fd, indirect_node * buffer, int indirect_node_inde
     memcpy(block_buffer + offset, buffer, SIZEOF_INDIRECT_NODE);
 
     if (write_block(fd, (void *) block_buffer, indirect_node_blocks_index + block_no) == -1) {
-        pprintf("Unable to write block [write_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to write block [write_indirect_node]");
         free(block_buffer);
         return -1;
     }
@@ -207,33 +207,33 @@ int write_indirect_node(int * fd, indirect_node * buffer, int indirect_node_inde
  */
 int read_indirect_node(int * fd, indirect_node * buffer, int indirect_node_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
-        pprintf("Invalid parameters provided [read_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [read_indirect_node]");
         return -1;
     }
 
     // 0 till (TOTAL_NO_OF_INODES - 1) is equal to the TOTAL_NO_OF_INODES,
     // hence when >= is used, not just >
     if (indirect_node_index < 0 || indirect_node_index >= TOTAL_NO_OF_INDIRECT_NODES(SIZEOF_INODE)) {
-        pprintf("Invalid indirect node index provided [read_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid indirect node index provided [read_indirect_node]");
         return -1;
     }
 
     int block_no = (int) (indirect_node_index / NO_OF_INDIRECT_NODES_PER_BLOCK(SIZEOF_INDIRECT_NODE));
     int indirect_node_blocks_Index = INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY);
     if ((block_no + indirect_node_blocks_Index) < 0 || (block_no + indirect_node_blocks_Index) > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block no calculated [read_indirect_node]");
+        if (DEBUG == 1) pprintf("Invalid block no calculated [read_indirect_node]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [read_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [read_indirect_node]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, indirect_node_blocks_Index + block_no) == -1) {
-        pprintf("Unable to read block [read_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to read block [read_indirect_node]");
         free(block_buffer);
         return -1;
     }
@@ -261,7 +261,7 @@ int clean_indirect_node(int * fd, int indirect_node_index) {
     memset(temp.pointers, 0, NO_OF_DIRECT_INDEXES * sizeof(int32_t));
 
     if (write_indirect_node(fd, &temp, indirect_node_index) == -1) {
-        pprintf("Unable to clean indirect node [clean_indirect_node]");
+        if (DEBUG == 1) pprintf("Unable to clean indirect node [clean_indirect_node]");
         return -1;
     }
 

@@ -28,7 +28,7 @@
  */
 int initialize_inode_blocks(int * fd) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [initialize_inode_blocks]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [initialize_inode_blocks]");
         return -1;
     }
 
@@ -47,7 +47,7 @@ int initialize_inode_blocks(int * fd) {
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [initialize_inode_blocks]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [initialize_inode_blocks]");
         perror("malloc");
         return -1;
     }
@@ -66,7 +66,7 @@ int initialize_inode_blocks(int * fd) {
     // (it is the same as total no of inode blocks)
     for (i = INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); i < INDIRECT_NODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); i++) {
         if (write_block(fd, (void *) block_buffer, i) == -1) {
-            pprintf("Unable to write block [initialize_inode_blocks]");
+            if (DEBUG == 1) pprintf("Unable to write block [initialize_inode_blocks]");
             free(block_buffer);
             return -1;
         }
@@ -91,33 +91,33 @@ int initialize_inode_blocks(int * fd) {
  */
 int write_inode(int * fd, inode * buffer, int inode_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
-        pprintf("Invalid parameters provided [write_inode]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [write_inode]");
         return -1;
     }
 
     // 0 till (TOTAL_NO_OF_INODES - 1) is equal to the TOTAL_NO_OF_INODES,
     // hence when >= is used, not just >
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [write_inode]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [write_inode]");
         return -1;
     }
 
     int block_no = (int) (inode_index / NO_OF_INODES_PER_BLOCK(SIZEOF_INODE));
     int inode_blocks_index = INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY);
     if ((block_no + inode_blocks_index) < 0 || (block_no + inode_blocks_index) > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block no calculated [write_inode]");
+        if (DEBUG == 1) pprintf("Invalid block no calculated [write_inode]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [write_inode]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [write_inode]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, inode_blocks_index + block_no) == -1) {
-        pprintf("Unable to read block [write_inode]");
+        if (DEBUG == 1) pprintf("Unable to read block [write_inode]");
         free(block_buffer);
         return -1;
     }
@@ -126,7 +126,7 @@ int write_inode(int * fd, inode * buffer, int inode_index) {
     memcpy(block_buffer + offset, buffer, SIZEOF_INODE);
 
     if (write_block(fd, (void *) block_buffer, inode_blocks_index + block_no) == -1) {
-        pprintf("Unable to write block [write_inode]");
+        if (DEBUG == 1) pprintf("Unable to write block [write_inode]");
         free(block_buffer);
         return -1;
     }
@@ -145,33 +145,33 @@ int write_inode(int * fd, inode * buffer, int inode_index) {
  */
 int read_inode(int * fd, inode * buffer, int inode_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
-        pprintf("Invalid parameters provided [read_inode]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [read_inode]");
         return -1;
     }
 
     // 0 till (TOTAL_NO_OF_INODES - 1) is equal to the TOTAL_NO_OF_INODES,
     // hence when >= is used, not just >
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [read_inode]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [read_inode]");
         return -1;
     }
 
     int block_no = (int) (inode_index / NO_OF_INODES_PER_BLOCK(SIZEOF_INODE));
     int inode_blocks_index = INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY);
     if ((block_no + inode_blocks_index) < 0 || (block_no + inode_blocks_index) > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block no calculated [read_inode]");
+        if (DEBUG == 1) pprintf("Invalid block no calculated [read_inode]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [read_inode]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [read_inode]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, inode_blocks_index + block_no) == -1) {
-        pprintf("Unable to read block [read_inode]");
+        if (DEBUG == 1) pprintf("Unable to read block [read_inode]");
         free(block_buffer);
         return -1;
     }
@@ -194,12 +194,12 @@ int read_inode(int * fd, inode * buffer, int inode_index) {
  */
 int clean_inode(int * fd, int inode_index) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [clean_inode]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [clean_inode]");
         return -1;
     }
 
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [clean_inode]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [clean_inode]");
         return -1;
     }
 
@@ -217,7 +217,7 @@ int clean_inode(int * fd, int inode_index) {
     memset(temp.pointers, 0, (NO_OF_DIRECT_INDEXES + NO_OF_INDIRECT_INDEXES) * sizeof(int32_t));
 
     if (write_inode(fd, &temp, inode_index) == -1) {
-        pprintf("Unable to clean inode [clean_inode]");
+        if (DEBUG == 1) pprintf("Unable to clean inode [clean_inode]");
         return -1;
     }
 
@@ -229,7 +229,7 @@ int clean_inode(int * fd, int inode_index) {
 
 int add_inode(int * fd, inode * buffer) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
-        pprintf("Invalid parameters provided [add_inode]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [add_inode]");
         return -1;
     }
 
@@ -250,12 +250,12 @@ int add_inode(int * fd, inode * buffer) {
 
 int empty_inode(int * fd, inode * inode_buff, int inode_index) {
     if (fd == NULL || *fd < 0 || inode_buff == NULL) {
-        pprintf("Invalid parameters provided [empty_inode]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [empty_inode]");
         return -1;
     }
 
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [empty_inode]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [empty_inode]");
         return -1;
     }
 

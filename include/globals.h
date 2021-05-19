@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#define DEBUG 0
+
 #define MB_TO_BYTES(n) ((int) (n * 1024 * 1024))
 #define KB_TO_BYTES(n) ((int) (n * 1024))
 

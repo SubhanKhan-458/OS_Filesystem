@@ -21,7 +21,7 @@
  */
 int initialize_dentry_blocks(int * fd) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [initialize_dentry_blocks]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [initialize_dentry_blocks]");
         return -1;
     }
 
@@ -30,7 +30,7 @@ int initialize_dentry_blocks(int * fd) {
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [initialize_dentry_blocks]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [initialize_dentry_blocks]");
         perror("malloc");
         return -1;
     }
@@ -49,7 +49,7 @@ int initialize_dentry_blocks(int * fd) {
     // (it is the same as total no of dentry blocks)
     for (i = DENTRY_BLOCKS_INDEX_NO; i < INODE_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY); i++) {
         if (write_block(fd, (void *) block_buffer, i) == -1) {
-            pprintf("Unable to write block [initialize_dentry_blocks]");
+            if (DEBUG == 1) pprintf("Unable to write block [initialize_dentry_blocks]");
             free(block_buffer);
             return -1;
         }
@@ -70,33 +70,33 @@ int initialize_dentry_blocks(int * fd) {
 // try to place dentry early on, i.e. from index 0...
 int write_dentry(int * fd, dentry * buffer, int dentry_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
-        pprintf("Invalid parameters provided [write_dentry]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [write_dentry]");
         return -1;
     }
 
     // 0 till (TOTAL_NO_OF_DENTRY - 1) is equal to the TOTAL_NO_OF_DENTRY,
     // hence when >= is used, not just >
     if (dentry_index < 0 || dentry_index >= TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)) {
-        pprintf("Invalid dentry index provided [write_dentry]");
+        if (DEBUG == 1) pprintf("Invalid dentry index provided [write_dentry]");
         return -1;
     }
 
     int block_no = (int) (dentry_index / NO_OF_DENTRY_PER_BLOCK(SIZEOF_DENTRY));
     int dentry_blocks_index = DENTRY_BLOCKS_INDEX_NO;
     if ((block_no + dentry_blocks_index) < 0 || (block_no + dentry_blocks_index) > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block no calculated [write_dentry]");
+        if (DEBUG == 1) pprintf("Invalid block no calculated [write_dentry]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [write_dentry]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [write_dentry]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, dentry_blocks_index + block_no) == -1) {
-        pprintf("Unable to read block [write_dentry]");
+        if (DEBUG == 1) pprintf("Unable to read block [write_dentry]");
         free(block_buffer);
         return -1;
     }
@@ -105,7 +105,7 @@ int write_dentry(int * fd, dentry * buffer, int dentry_index) {
     memcpy(block_buffer + offset, buffer, SIZEOF_DENTRY);
 
     if (write_block(fd, (void *) block_buffer, dentry_blocks_index + block_no) == -1) {
-        pprintf("Unable to write block [write_dentry]");
+        if (DEBUG == 1) pprintf("Unable to write block [write_dentry]");
         free(block_buffer);
         return -1;
     }
@@ -124,33 +124,33 @@ int write_dentry(int * fd, dentry * buffer, int dentry_index) {
  */
 int read_dentry(int * fd, dentry * buffer, int dentry_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL) {
-        pprintf("Invalid parameters provided [read_dentry]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [read_dentry]");
         return -1;
     }
 
     // 0 till (TOTAL_NO_OF_INODES - 1) is equal to the TOTAL_NO_OF_INODES,
     // hence when >= is used, not just >
     if (dentry_index < 0 || dentry_index >= TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY)) {
-        pprintf("Invalid dentry index provided [read_dentry]");
+        if (DEBUG == 1) pprintf("Invalid dentry index provided [read_dentry]");
         return -1;
     }
 
     int block_no = ((int) (dentry_index / NO_OF_DENTRY_PER_BLOCK(SIZEOF_DENTRY)));
     int dentry_blocks_index = DENTRY_BLOCKS_INDEX_NO;
     if ((block_no + dentry_blocks_index) < 0 || (block_no + dentry_blocks_index) > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block no calculated [read_dentry]");
+        if (DEBUG == 1) pprintf("Invalid block no calculated [read_dentry]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [read_dentry]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [read_dentry]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, dentry_blocks_index + block_no) == -1) {
-        pprintf("Unable to read block [read_dentry]");
+        if (DEBUG == 1) pprintf("Unable to read block [read_dentry]");
         free(block_buffer);
         return -1;
     }
@@ -177,7 +177,7 @@ int clean_dentry(int * fd, int dentry_index) {
     };
 
     if (write_dentry(fd, &temp, dentry_index) == -1) {
-        pprintf("Unable to clean dentry [clean_dentry]");
+        if (DEBUG == 1) pprintf("Unable to clean dentry [clean_dentry]");
         return -1;
     }
 
@@ -197,7 +197,7 @@ int djb2_hash(char * string) {
 
 int dentry_lookup(int * fd, char * node_name, int nth_occurence) {
     if (fd == NULL || fd < 0 || node_name == NULL) {
-        pprintf("Invalid parameters provided [dentry_lookup]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [dentry_lookup]");
         return -1;
     }
     
@@ -210,7 +210,7 @@ int dentry_lookup(int * fd, char * node_name, int nth_occurence) {
     }
 
     if (read_dentry(fd, &temp, (dentry_index % TOTAL_NO_OF_DENTRY(SIZEOF_INODE, SIZEOF_DENTRY))) == -1) {
-        pprintf("Unable to read dentry [dentry_lookup]");
+        if (DEBUG == 1) pprintf("Unable to read dentry [dentry_lookup]");
         return -1;
     }
 
@@ -219,12 +219,12 @@ int dentry_lookup(int * fd, char * node_name, int nth_occurence) {
 
 int dentry_lookup_using_inode_index(int * fd, int inode_index) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [dentry_lookup_using_inode_index]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [dentry_lookup_using_inode_index]");
         return -1;
     }
 
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [dentry_lookup_using_inode_index]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [dentry_lookup_using_inode_index]");
         return -1;
     }
 
@@ -248,12 +248,12 @@ int dentry_lookup_using_inode_index(int * fd, int inode_index) {
 
 int dentry_lookup_with_index(int * fd, char * nod_name, int inode_index) {
     if (fd == NULL || fd < 0 || nod_name == NULL) {
-        pprintf("Invalid parameters provided [dentry_lookup]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [dentry_lookup]");
         return -1;
     }
 
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [dentry_lookup]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [dentry_lookup]");
         return -1;
     }
 
@@ -263,7 +263,7 @@ int dentry_lookup_with_index(int * fd, char * nod_name, int inode_index) {
 
     do {
         if (read_dentry(fd, &temp, dentry_index) == -1) {
-            pprintf("Unable to read dentry [dentry_lookup]");
+            if (DEBUG == 1) pprintf("Unable to read dentry [dentry_lookup]");
             return -1;
         }
 
@@ -276,12 +276,12 @@ int dentry_lookup_with_index(int * fd, char * nod_name, int inode_index) {
 
 int add_dentry(int * fd, char * inode_name, int inode_name_len, int inode_index) {
     if (fd == NULL || *fd < 0 || inode_name == NULL) {
-        pprintf("Invalid parameters provided [add_dentry]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [add_dentry]");
         return -1;
     }
 
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [add_dentry]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [add_dentry]");
         return -1;
     }
 
@@ -302,7 +302,7 @@ int add_dentry(int * fd, char * inode_name, int inode_name_len, int inode_index)
 
     do {
         if (read_dentry(fd, &dentry_buff, dentry_index) == -1) {
-            pprintf("Unable to read dentry [add_dentry]");
+            if (DEBUG == 1) pprintf("Unable to read dentry [add_dentry]");
             return -1;
         }
 
@@ -312,7 +312,7 @@ int add_dentry(int * fd, char * inode_name, int inode_name_len, int inode_index)
             dentry_buff.inode_index = (inode_index + 1);
             
             if (write_dentry(fd, &dentry_buff, dentry_index) == -1) {
-                pprintf("Unable to write dentry [add_dentry]");
+                if (DEBUG == 1) pprintf("Unable to write dentry [add_dentry]");
                 return -1;
             }
 

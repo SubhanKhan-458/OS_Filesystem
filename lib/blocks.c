@@ -21,28 +21,28 @@
  */
 int read_block(int * fd, void * buffer, int block_no) {
     if (fd == NULL || buffer == NULL) {
-        pprintf("Invalid parameters provided [read_block]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [read_block]");
         return -1;
     }
 
     if (*fd < 0) {
-        pprintf("Invalid file descriptor provided [read_block]");
+        if (DEBUG == 1) pprintf("Invalid file descriptor provided [read_block]");
         return -1;
     }
 
     if (block_no < 0 || block_no > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block_no provided [read_block]");
+        if (DEBUG == 1) pprintf("Invalid block_no provided [read_block]");
         return -1;
     }
 
     if (lseek(*fd, (block_no * BLOCK_SIZE), SEEK_SET) == -1) {
-        pprintf("Unable to seek in file [read_block]");
+        if (DEBUG == 1) pprintf("Unable to seek in file [read_block]");
         perror("lseek");
         return -1;
     }
 
     if (read(*fd, buffer, BLOCK_SIZE) == -1) {
-        pprintf("Unable to read block [read_block]");
+        if (DEBUG == 1) pprintf("Unable to read block [read_block]");
         perror("read");
         return -1;
     }
@@ -60,28 +60,28 @@ int read_block(int * fd, void * buffer, int block_no) {
  */
 int write_block(int * fd, void * buffer, int block_no) {
     if (fd == NULL || buffer == NULL) {
-        pprintf("Invalid parameters provided [write_block]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [write_block]");
         return -1;
     }
 
     if (*fd < 0) {
-        pprintf("Invalid file descriptor provided [write_block]");
+        if (DEBUG == 1) pprintf("Invalid file descriptor provided [write_block]");
         return -1;
     }
 
     if (block_no < 0 || block_no > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block_no provided [write_block]");
+        if (DEBUG == 1) pprintf("Invalid block_no provided [write_block]");
         return -1;
     }
 
     if (lseek(*fd, (block_no * BLOCK_SIZE), SEEK_SET) == -1) {
-        pprintf("Unable to seek in file [write_block]");
+        if (DEBUG == 1) pprintf("Unable to seek in file [write_block]");
         perror("lseek");
         return -1;
     }
 
     if (write(*fd, buffer, BLOCK_SIZE) == -1) {
-        pprintf("Unable to write block [write_block]");
+        if (DEBUG == 1) pprintf("Unable to write block [write_block]");
         perror("read");
         return -1;
     }
@@ -98,18 +98,18 @@ int write_block(int * fd, void * buffer, int block_no) {
  */
 int clean_block(int * fd, int block_no) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [clean_block]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [clean_block]");
         return -1;
     }
 
     if (block_no < 0 || block_no > TOTAL_NO_OF_BLOCKS) {
-        pprintf("Invalid block_no provided [clean_block]");
+        if (DEBUG == 1) pprintf("Invalid block_no provided [clean_block]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [clean_block]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [clean_block]");
         perror("malloc");
         return -1;
     }
@@ -117,7 +117,7 @@ int clean_block(int * fd, int block_no) {
     memset(block_buffer, '\0', BLOCK_SIZE);
 
     if (write_block(fd, (void *) block_buffer, block_no) == -1) {
-        pprintf("Unable to write block [clean_block]");
+        if (DEBUG == 1) pprintf("Unable to write block [clean_block]");
         free(block_buffer);
         return -1;
     }
@@ -135,13 +135,13 @@ int clean_block(int * fd, int block_no) {
  */
 int clean_all_blocks(int * fd) {
     if (fd == NULL || *fd < 0) {
-        pprintf("Invalid parameters provided [clean_all_blocks]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [clean_all_blocks]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [clean_all_blocks]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [clean_all_blocks]");
         perror("malloc");
         return -1;
     }
@@ -152,7 +152,7 @@ int clean_all_blocks(int * fd) {
     
     for (i = 0; i < TOTAL_NO_OF_BLOCKS; i++) {
         if (write_block(fd, (void *) block_buffer, i) == -1) {
-            pprintf("Unable to write block [clean_all_blocks]");
+            if (DEBUG == 1) pprintf("Unable to write block [clean_all_blocks]");
             free(block_buffer);
             return -1;
         }

@@ -24,14 +24,14 @@
  */
 int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL || buffer_size < 0) {
-        pprintf("Invalid parameters provided [write_data]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [write_data]");
         return -1;
     }
 
     // 0 till (TOTAL_NO_OF_INODES - 1) is equal to the TOTAL_NO_OF_INODES,
     // hence when >= is used, not just >
     if (inode_index < 0 || inode_index >= TOTAL_NO_OF_INODES(SIZEOF_INODE)) {
-        pprintf("Invalid inode index provided [write_data]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [write_data]");
         return -1;
     }
 
@@ -40,12 +40,12 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
     inode temp_inode;
 
     if (read_inode(fd, &temp_inode, inode_index) == -1) {
-        pprintf("Unable to read inode [write_data]");
+        if (DEBUG == 1) pprintf("Unable to read inode [write_data]");
         return -1;
     }
 
     if (temp_inode.type == IS_EMPTY_INODE) {
-        pprintf("Invalid inode index provided [write_data]");
+        if (DEBUG == 1) pprintf("Invalid inode index provided [write_data]");
         return -1;
     }
 
@@ -58,12 +58,12 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
             return 1;
         }
 
-        pprintf("Unable to write to inode; data blocks full [write_data]");
+        if (DEBUG == 1) pprintf("Unable to write to inode; data blocks full [write_data]");
         return -1;
     } else {
         char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
         if (block_buffer == NULL) {
-            pprintf("Unable to allocate memory [write_data]");
+            if (DEBUG == 1) pprintf("Unable to allocate memory [write_data]");
             perror("malloc");
             return -1;
         }
@@ -78,7 +78,7 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
             // bytes to fill up that block
             if (partition_handled == 0) {
                 if (fill_used_block_with_partition(fd, block_buffer, buffer, &temp_inode, &bytes_left) == -1) {
-                    pprintf("Unable to partition and write [write_data] {this is not necessarily an error! (NOT ABORTING!)}");
+                    if (DEBUG == 1) pprintf("Unable to partition and write [write_data] {this is not necessarily an error! (NOT ABORTING!)}");
                 }
 
                 partition_handled = 1;
@@ -87,7 +87,7 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
 
             memcpy(block_buffer, buffer + (blocks_written * BLOCK_SIZE * sizeof(char)), sizeof(char) * BLOCK_SIZE);
             if (fill_free_blocks(fd, block_buffer, (sizeof(char) * BLOCK_SIZE), &temp_inode, inode_index) == -1) {
-                pprintf("Unable to fill free blocks [write_data]");
+                if (DEBUG == 1) pprintf("Unable to fill free blocks [write_data]");
                 free(block_buffer);
                 return -1;
             }
@@ -108,7 +108,7 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
                 return 1;
             }
 
-            pprintf("Unable to write to inode; data blocks full [write_data]");
+            if (DEBUG == 1) pprintf("Unable to write to inode; data blocks full [write_data]");
             free(block_buffer);
             return -1;
         }
@@ -120,20 +120,20 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
         // update inode's size
         inode inode_buff;
         if (read_inode(fd, &inode_buff, inode_index) == -1) {
-            pprintf("Unable to read inode [write_data]");
+            if (DEBUG == 1) pprintf("Unable to read inode [write_data]");
             return -1;
         }
 
         inode_buff.size += buffer_size;
         if (write_inode(fd, &inode_buff, inode_index) == -1) {
-            pprintf("Unable to write inode [write_data]");
+            if (DEBUG == 1) pprintf("Unable to write inode [write_data]");
             return -1;
         }
 
         return 1;
     }
 
-    pprintf("Unable to write to inode; data blocks full [write_data]");
+    if (DEBUG == 1) pprintf("Unable to write to inode; data blocks full [write_data]");
     return -1;
 }
 
@@ -150,18 +150,18 @@ int write_data(int * fd, char * buffer, int buffer_size, int inode_index) {
  */
 int fill_used_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buffer) {
     if (fd == NULL || *fd < 0 || buffer == NULL || buffer_size < 0 || inode_buffer == NULL) {
-        pprintf("Invalid parameters provided [fill_used_blocks]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [fill_used_blocks]");
         return -1;
     }
 
     if (buffer_size > BLOCK_SIZE) {
-        pprintf("Provided buffer must be less than BLOCK_SIZE [fill_used_blocks]");
+        if (DEBUG == 1) pprintf("Provided buffer must be less than BLOCK_SIZE [fill_used_blocks]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [fill_used_blocks]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [fill_used_blocks]");
         perror("malloc");
         return -1;
     }
@@ -180,7 +180,7 @@ int fill_used_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
         }
 
         if (read_indirect_node(fd, &temp_indirect_node, indirect_node_index) == -1) {
-            pprintf("Unable to read indirect node [fill_used_blocks]");
+            if (DEBUG == 1) pprintf("Unable to read indirect node [fill_used_blocks]");
             return -1;
         }
 
@@ -190,7 +190,7 @@ int fill_used_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
         }
     }
 
-    pprintf("Unable to write block [fill_used_blocks] {this might be due to not having any half-full blocks! (not necessary an error)}");
+    if (DEBUG == 1) pprintf("Unable to write block [fill_used_blocks] {this might be due to not having any half-full blocks! (not necessary an error)}");
     free(block_buffer);
     return -1;
 }
@@ -207,12 +207,12 @@ int fill_used_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
  */
 int write_remaining_buffer_to_block(int * fd, char * block_buffer, char * buffer, int buffer_size, int * pointers) {
     if (fd == NULL || *fd < 0 || block_buffer == NULL || buffer == NULL || buffer_size < 0 || pointers == NULL) {
-        pprintf("Invalid parameters provided [write_remaining_buffer_to_block]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [write_remaining_buffer_to_block]");
         return -1;
     }
 
     if (buffer_size > BLOCK_SIZE) {
-        pprintf("Provided buffer must be less than BLOCK_SIZE [write_remaining_buffer_to_block]");
+        if (DEBUG == 1) pprintf("Provided buffer must be less than BLOCK_SIZE [write_remaining_buffer_to_block]");
         return -1;
     }
 
@@ -227,7 +227,7 @@ int write_remaining_buffer_to_block(int * fd, char * block_buffer, char * buffer
         }
 
         if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
-            pprintf("Unable to read block [write_remaining_buffer_to_block]");
+            if (DEBUG == 1) pprintf("Unable to read block [write_remaining_buffer_to_block]");
             // free(block_buffer);
             return -1;
         }
@@ -253,7 +253,7 @@ int write_remaining_buffer_to_block(int * fd, char * block_buffer, char * buffer
     }
 
     // will unnecessarily print a misleading message in case of not having any half-full blocks
-    // pprintf("Unable to write block [write_remaining_buffer_to_block]");
+    // if (DEBUG == 1) pprintf("Unable to write block [write_remaining_buffer_to_block]");
     return -1;
 }
 
@@ -269,12 +269,12 @@ int write_remaining_buffer_to_block(int * fd, char * block_buffer, char * buffer
  */
 int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buffer, int inode_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL || buffer_size < 0 || inode_buffer == NULL) {
-        pprintf("Invalid parameters provided [fill_free_blocks]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [fill_free_blocks]");
         return -1;
     }
 
     // if (buffer_size != BLOCK_SIZE) {
-    //     pprintf("Provided buffer must be equal to BLOCK_SIZE [fill_free_blocks]");
+    //     if (DEBUG == 1) pprintf("Provided buffer must be equal to BLOCK_SIZE [fill_free_blocks]");
     //     return -1;
     // }
 
@@ -283,7 +283,7 @@ int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
     if (( data_block_index = write_full_buffer_to_block(fd, buffer, buffer_size, inode_buffer->pointers, &pointer_index)) != -1) {
         inode_buffer->pointers[pointer_index] = data_block_index;
         if (write_inode(fd, inode_buffer, inode_index) == -1) {
-            pprintf("Unable to write to inode [fill_free_blocks]");
+            if (DEBUG == 1) pprintf("Unable to write to inode [fill_free_blocks]");
             return -1;
         }
 
@@ -300,13 +300,13 @@ int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
         if (indirect_node_index == -1) {
             indirect_node_index = get_free_indirect_node_index();
             if (indirect_node_index < 0) {
-                pprintf("No free indirect node is available [fill_free_blocks]");
+                if (DEBUG == 1) pprintf("No free indirect node is available [fill_free_blocks]");
                 return -1;
             }
 
             // initializes an indirect node and leaves it at an empty state
             if (clean_indirect_node(fd, indirect_node_index) == -1) {
-                pprintf("Unable to initialize inode [fill_free_blocks]");
+                if (DEBUG == 1) pprintf("Unable to initialize inode [fill_free_blocks]");
                 return -1;
             }
 
@@ -316,20 +316,20 @@ int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
             inode_buffer->pointers[i] = (indirect_node_index + 1);
             
             if (write_inode(fd, inode_buffer, inode_index) == -1) {
-                pprintf("Unable to write to inode [fill_free_blocks]");
+                if (DEBUG == 1) pprintf("Unable to write to inode [fill_free_blocks]");
                 return -1;
             }
         }
 
         if (read_indirect_node(fd, &temp_indirect_node, indirect_node_index) == -1) {
-            pprintf("Unable to read indirect node [fill_free_blocks]");
+            if (DEBUG == 1) pprintf("Unable to read indirect node [fill_free_blocks]");
             return -1;
         }
 
         if (( data_block_index = write_full_buffer_to_block(fd, buffer, buffer_size, temp_indirect_node.pointers, &pointer_index)) != -1) {
             temp_indirect_node.pointers[pointer_index] = data_block_index;
             if (write_indirect_node(fd, &temp_indirect_node, indirect_node_index) == -1) {
-                pprintf("Unable to write indirect node [fill_free_blocks]");
+                if (DEBUG == 1) pprintf("Unable to write indirect node [fill_free_blocks]");
                 return -1;
             }
 
@@ -337,7 +337,7 @@ int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
         }
     }
 
-    pprintf("Unable to write block [fill_free_blocks]");
+    if (DEBUG == 1) pprintf("Unable to write block [fill_free_blocks]");
     return -1;
 }
 
@@ -353,12 +353,12 @@ int fill_free_blocks(int * fd, char * buffer, int buffer_size, inode * inode_buf
  */
 int write_full_buffer_to_block(int * fd, char * buffer, int buffer_size, int * pointers, int * pointer_index) {
     if (fd == NULL || *fd < 0 || buffer == NULL || buffer_size < 0 || pointers == NULL) {
-        pprintf("Invalid parameters provided [write_full_buffer_to_block]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [write_full_buffer_to_block]");
         return -1;
     }
 
     // if (buffer_size != BLOCK_SIZE) {
-    //     pprintf("Provided buffer must be equal to BLOCK_SIZE [write_full_buffer_to_block]");
+    //     if (DEBUG == 1) pprintf("Provided buffer must be equal to BLOCK_SIZE [write_full_buffer_to_block]");
     //     return -1;
     // }
 
@@ -374,7 +374,7 @@ int write_full_buffer_to_block(int * fd, char * buffer, int buffer_size, int * p
 
         data_block_index = get_free_data_block_index();
         if (data_block_index < 0) {
-            pprintf("No free data block is avaialble [write_full_buffer_to_block]");
+            if (DEBUG == 1) pprintf("No free data block is avaialble [write_full_buffer_to_block]");
             return -1;
         }
 
@@ -383,7 +383,7 @@ int write_full_buffer_to_block(int * fd, char * buffer, int buffer_size, int * p
         // TODO: Refactor later to pass as an argument, since it would be allocated/deallocated rapidly
         char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
         if (block_buffer == NULL) {
-            pprintf("Unable to allocate memory [write_full_buffer_to_block]");
+            if (DEBUG == 1) pprintf("Unable to allocate memory [write_full_buffer_to_block]");
             perror("malloc");
             return -1;
         }
@@ -415,7 +415,7 @@ int write_full_buffer_to_block(int * fd, char * buffer, int buffer_size, int * p
  */
 int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer, inode * inode_buffer, int * bytes_left) {
     if (fd == NULL || *fd < 0 || buffer == NULL || block_buffer == NULL || inode_buffer == NULL) {
-        pprintf("Invalid parameters provided [fill_used_block_with_partition]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [fill_used_block_with_partition]");
         return -1;
     }
 
@@ -424,7 +424,7 @@ int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer,
         return 1;
     }
 
-    pprintf("Unable to partition and write to data block [fill_used_block_with_partition] {this isn't necessarily an error!}");
+    if (DEBUG == 1) pprintf("Unable to partition and write to data block [fill_used_block_with_partition] {this isn't necessarily an error!}");
     
     int i, indirect_node_index;
     indirect_node temp_indirect_node;
@@ -434,17 +434,17 @@ int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer,
         indirect_node_index = (inode_buffer->pointers[i] - 1);
 
         if (indirect_node_index == -1) {
-            pprintf("Invalid indirect node index [fill_used_block_with_partition]");
+            if (DEBUG == 1) pprintf("Invalid indirect node index [fill_used_block_with_partition]");
             continue;
         }
 
         if (read_indirect_node(fd, &temp_indirect_node, indirect_node_index) == -1) {
-            pprintf("Unable to read indirect node [fill_used_block_with_partition]");
+            if (DEBUG == 1) pprintf("Unable to read indirect node [fill_used_block_with_partition]");
             return -1;
         }
 
         if (partition_and_write(fd, block_buffer, buffer, temp_indirect_node.pointers, inode_buffer, bytes_left) == -1) {
-            pprintf("Unable to partition and write to indirect node [fill_used_block_with_partition] {this isn't necessarily an error!}");
+            if (DEBUG == 1) pprintf("Unable to partition and write to indirect node [fill_used_block_with_partition] {this isn't necessarily an error!}");
             // return -1;
         }
     }
@@ -466,7 +466,7 @@ int fill_used_block_with_partition(int * fd, char * block_buffer, char * buffer,
  */
 int partition_and_write(int * fd, char * block_buffer, char * buffer, int * pointers, inode * inode_buffer, int * bytes_left) {
     if (fd == NULL || *fd < 0 || buffer == NULL || block_buffer == NULL || inode_buffer == NULL) {
-        pprintf("Invalid parameters provided [partition_and_write]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [partition_and_write]");
         return -1;
     }
 
@@ -484,7 +484,7 @@ int partition_and_write(int * fd, char * block_buffer, char * buffer, int * poin
             // and only once
             memcpy(block_buffer, buffer, partitioned_byte_count);
             if (fill_used_blocks(fd, block_buffer, partitioned_byte_count, inode_buffer) == -1) {
-                pprintf("Unable to fill used blocks for partitioned data [fill_used_block_with_partition]");
+                if (DEBUG == 1) pprintf("Unable to fill used blocks for partitioned data [fill_used_block_with_partition]");
                 return -1;
             }
         
@@ -508,7 +508,7 @@ int partition_and_write(int * fd, char * block_buffer, char * buffer, int * poin
  */
 int get_remaining_byte_count(int * fd, int data_block_index) {
     if (fd == NULL || *fd < 0 ) {
-        pprintf("Invalid parameters provided [get_remaining_byte_count]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [get_remaining_byte_count]");
         return -1;
     }
 
@@ -518,19 +518,19 @@ int get_remaining_byte_count(int * fd, int data_block_index) {
 
     int i = (data_block_index - DATA_BLOCKS_INDEX_NO(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE));
     if (i < 0 || i > TOTAL_NO_OF_DATA_BLOCKS(SIZEOF_INODE, SIZEOF_DENTRY, SIZEOF_INDIRECT_NODE)) {
-        pprintf("Invalid data block index provided [get_remaining_byte_count]");
+        if (DEBUG == 1) pprintf("Invalid data block index provided [get_remaining_byte_count]");
         return -1;
     }
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [get_remaining_byte_count]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [get_remaining_byte_count]");
         perror("malloc");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
-        pprintf("Unable to read block [get_remaining_byte_count]");
+        if (DEBUG == 1) pprintf("Unable to read block [get_remaining_byte_count]");
         free(block_buffer);
         return -1;
     }
@@ -554,12 +554,12 @@ int get_remaining_byte_count(int * fd, int data_block_index) {
 // data_pointer is from 0 till (NO_OF_DIRECT_INDEXES - 1)
 int read_data_by_block(int * fd, char * block_buffer, inode * inode_buffer, int pointer) {
     if (fd == NULL || *fd < 0 || block_buffer == NULL || inode_buffer == NULL) {
-        pprintf("Invalid parameters provided [read_data_by_block]");
+        if (DEBUG == 1) pprintf("Invalid parameters provided [read_data_by_block]");
         return -1;
     }
 
     if (pointer < 0 || pointer >= (NO_OF_DIRECT_INDEXES + (NO_OF_DIRECT_INDEXES * NO_OF_INDIRECT_INDEXES))) {
-        pprintf("Invalid pointer index provided (for data blocks) [read_data_by_block]");
+        if (DEBUG == 1) pprintf("Invalid pointer index provided (for data blocks) [read_data_by_block]");
         return -1;
     }
 
@@ -572,23 +572,23 @@ int read_data_by_block(int * fd, char * block_buffer, inode * inode_buffer, int 
         int indirect_node_index = inode_buffer->pointers[NO_OF_DIRECT_INDEXES + pointer_to_indirect_node] - 1;
 
         if (indirect_node_index == -1) {
-            pprintf("Invalid indirect node index [read_data_by_block]");
+            if (DEBUG == 1) pprintf("Invalid indirect node index [read_data_by_block]");
             return -1;
         }
 
         if (read_indirect_node(fd, &indirect_node_buff, indirect_node_index) == -1) {
-            pprintf("Unable to read indirect node [read_data_by_block]");
+            if (DEBUG == 1) pprintf("Unable to read indirect node [read_data_by_block]");
             return -1;
         }
 
         data_block_index = indirect_node_buff.pointers[pointer % (NO_OF_DIRECT_INDEXES)];
         if (data_block_index == 0) {
-            pprintf("Unable to read block [read_data_by_block]");
+            if (DEBUG == 1) pprintf("Unable to read block [read_data_by_block]");
             return -1;
         }
 
         if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
-            pprintf("Unable to read block [read_data_by_block]");
+            if (DEBUG == 1) pprintf("Unable to read block [read_data_by_block]");
             return -1;
         }
 
@@ -597,12 +597,12 @@ int read_data_by_block(int * fd, char * block_buffer, inode * inode_buffer, int 
 
     data_block_index = inode_buffer->pointers[pointer];
     if (data_block_index == 0) {
-        pprintf("Unable to read block [read_data_by_block]");
+        if (DEBUG == 1) pprintf("Unable to read block [read_data_by_block]");
         return -1;
     }
 
     if (read_block(fd, (void *) block_buffer, data_block_index) == -1) {
-        pprintf("Unable to read block [read_data_by_block]");
+        if (DEBUG == 1) pprintf("Unable to read block [read_data_by_block]");
         return -1;
     }
 
@@ -618,7 +618,7 @@ int empty_data_blocks(int * fd, int32_t * pointers) {
 
     char * block_buffer = (char *) malloc(sizeof(char) * BLOCK_SIZE + 1);
     if (block_buffer == NULL) {
-        pprintf("Unable to allocate memory [empty_data_block]");
+        if (DEBUG == 1) pprintf("Unable to allocate memory [empty_data_block]");
         return -1;
     }
 
@@ -629,7 +629,7 @@ int empty_data_blocks(int * fd, int32_t * pointers) {
         if (data_block_index != 0) {
             if (write_block(fd, (void *) block_buffer, data_block_index) == -1) {
                 free(block_buffer);
-                pprintf("Unable to write block [empty_data_block]");
+                if (DEBUG == 1) pprintf("Unable to write block [empty_data_block]");
                 return -1;
             }
 
